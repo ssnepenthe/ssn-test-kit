@@ -13,5 +13,11 @@
         "psy/psysh": "^0.9.9",
         "slim/slim": "^3.12"
     },
+    "autoload": {
+        "psr-4": { "SsnTestKit\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "SsnTestKit\\Tests\\": "tests/" }
+    },
     "license": "MIT"
 }
