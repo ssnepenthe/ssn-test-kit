@@ -11,9 +11,22 @@ use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 
 class ResponseAssertionTest extends TestCase
 {
-    protected function makeResponse($status = 200)
+    protected function makeResponse($args = [])
     {
-        return new Response(new BrowserKitResponse('', $status), new Crawler());
+        if (is_string($args)) {
+            $args = ['content' => $args];
+        } elseif (is_int($args)) {
+            $args = ['status' => $args];
+        }
+
+        return new Response(
+            new BrowserKitResponse(
+                $args['content'] ?? '',
+                $args['status'] ?? 200,
+                $args['headers'] ?? []
+            ),
+            new Crawler()
+        );
     }
 
     protected function assertExpectationFailedExceptionIsThrownFor(callable $callable)
@@ -159,10 +172,10 @@ class ResponseAssertionTest extends TestCase
     public function it_can_assert_response_is_a_redirect()
     {
         foreach ([201, 301, 302, 303, 307, 308] as $status) {
-            $response = new Response(
-                new BrowserKitResponse('', $status, ['Location' => 'http://localhost/redirect']),
-                new Crawler()
-            );
+            $response = $this->makeResponse([
+                'status' => $status,
+                'headers' => ['Location' => 'http://localhost/redirect']
+            ]);
 
             $response->assertRedirect();
             $response->assertRedirect('http://localhost/redirect');
@@ -174,10 +187,7 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['Location' => 'http://localhost/redirect']),
-            new Crawler()
-        );
+        $response = $this->makeResponse(['headers' => ['Location' => 'http://localhost/redirect']]);
 
         $response->assertRedirect();
     }
@@ -187,10 +197,10 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse('', 301, ['Location' => 'http://localhost/redirect']),
-            new Crawler()
-        );
+        $response = $this->makeResponse([
+            'status' => 301,
+            'headers' => ['Location' => 'http://localhost/redirect']
+        ]);
 
         $response->assertRedirect('http://localhost/different/location');
     }
@@ -198,12 +208,7 @@ class ResponseAssertionTest extends TestCase
     /** @test */
     public function it_can_assert_header_is_present()
     {
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
-
-        $response->assertHeader('apple');
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeader('apple');
     }
 
     /** @test */
@@ -211,23 +216,13 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse(),
-            new Crawler()
-        );
-
-        $response->assertHeader('apple');
+        $this->makeResponse()->assertHeader('apple');
     }
 
     /** @test */
     public function it_can_assert_header_is_present_and_set_to_specific_value()
     {
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
-
-        $response->assertHeader('apple', 'red');
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeader('apple', 'red');
     }
 
     /** @test */
@@ -235,12 +230,7 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
-
-        $response->assertHeader('apple', 'yellow');
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeader('apple', 'yellow');
     }
 
     /** @test */
@@ -248,23 +238,13 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
-
-        $response->assertHeader('banana', 'yellow');
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeader('banana', 'yellow');
     }
 
     /** @test */
     public function it_can_assert_header_is_absent()
     {
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
-
-        $response->assertHeaderMissing('banana');
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeaderMissing('banana');
     }
 
     /** @test */
@@ -272,12 +252,9 @@ class ResponseAssertionTest extends TestCase
     {
         $this->expectException(AssertionFailedError::class);
 
-        $response = new Response(
-            new BrowserKitResponse('', 200, ['apple' => 'red']),
-            new Crawler()
-        );
+        $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeaderMissing('apple');
+    }
 
-        $response->assertHeaderMissing('apple');
     }
     }
 
