@@ -23,27 +23,16 @@ function render( string $template, array $data = [] ) {
 
 function register_routes( $app ) {
 	$app->get( '/', function( $request, $response ) {
-		return $response->write( 'home' );
+		return $response->write( render('home.php') );
 	} );
 
-	$app->get( '/js/{js:enabled|disabled}', function( $request, $response, $args ) {
-		return $response->write( render( 'javascript.php', [
-			'status' => $args['js'],
-		] ) );
+	$app->get( '/js-dom-mod', function( $request, $response ) {
+		return $response->write( render( 'js-dom-mod.php' ) );
 	} );
 
-	$status_list = ( new \ReflectionClass( \Slim\Http\StatusCode::class ) )->getConstants();
-
-	foreach ( $status_list as $message => $code ) {
-		$app->get(
-			"/status-code/{$code}",
-			function( $request, $response ) use ( $code, $message ) {
-				return $response->write(
-					render( 'status-code.php', compact( 'code', 'message' ) )
-				)->withStatus( $code );
-			}
-		);
-	}
+	$app->get( '/status-200', function( $request, $response ) {
+		return $response->write( render( 'status-code.php', [ 'status' => 200 ] ) );
+	} );
 }
 
 register_routes( $app );
