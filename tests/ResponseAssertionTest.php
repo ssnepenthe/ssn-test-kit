@@ -121,6 +121,39 @@ class ResponseAssertionTest extends TestCase {
 
 	/** @test */
 	public function it_can_assert_that_a_response_is_a_redirect() {
+		foreach ([201, 301, 302, 303, 307, 308] as $status) {
+			$response = new Response(
+				new BrowserKitResponse('', $status, ['Location' => 'http://localhost/redirect']),
+				new Crawler()
+			);
 
+			$response->assertRedirect();
+			$response->assertRedirect('http://localhost/redirect');
+		}
+
+		$response = new Response(
+			new BrowserKitResponse('', 200, ['Location' => 'http://localhost/redirect']),
+			new Crawler()
+		);
+		$e = null;
+
+		try {
+			$response->assertRedirect();
+		} catch (\Exception $e) {
+			// ...
+		}
+
+		$this->assertInstanceOf(ExpectationFailedException::class, $e);
+
+		$e = null;
+
+		try {
+			// Shouldn't matter because status code doesn't match.
+			$response->assertRedirect('http://localhost/redirect');
+		} catch (\Exception $e) {
+			// ...
+		}
+
+		$this->assertInstanceOf(ExpectationFailedException::class, $e);
 	}
 }

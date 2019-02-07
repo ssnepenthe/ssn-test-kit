@@ -26,6 +26,10 @@ function register_routes( $app ) {
 		return $response->write( render('home.php') );
 	} );
 
+	$app->get( '/js-delayed-visibility', function( $request, $response ) {
+		return $response->write( render( 'js-delayed-visibility.php' ) );
+	} );
+
 	$app->get( '/js-dom-mod', function( $request, $response ) {
 		return $response->write( render( 'js-dom-mod.php' ) );
 	} );

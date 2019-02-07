@@ -190,4 +190,19 @@ class Response
     {
         return $this->assertStatus(404);
     }
+
+    public function assertRedirect(string $uri = null)
+    {
+        Assert::assertTrue(
+            $this->isRedirect(),
+            "Response status code {$this->status()} is not a redirect status code"
+        );
+
+        if (null !== $uri) {
+            // Move to ->assertLocation()?
+            Assert::assertEquals($uri, $this->header('Location'));
+        }
+
+        return $this;
+    }
 }
