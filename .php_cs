@@ -2,7 +2,6 @@
 
 $finder = Symfony\Component\Finder\Finder::create()
     ->in(__DIR__)
-    ->exclude('tests') // Maybe don't exclude these?
     ->exclude('vendor')
     ->name('*.php');
 

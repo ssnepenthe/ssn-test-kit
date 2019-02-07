@@ -8,37 +8,39 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 $app = new \Slim\App();
 
-function render( string $template, array $data = [] ) {
-	extract( $data, EXTR_SKIP );
+function render(string $template, array $data = [])
+{
+    extract($data, EXTR_SKIP);
 
-	ob_start();
+    ob_start();
 
-	include __DIR__ . "/views/{$template}";
+    include __DIR__ . "/views/{$template}";
 
-	$html = ob_get_contents();
-	ob_end_clean();
+    $html = ob_get_contents();
+    ob_end_clean();
 
-	return $html;
+    return $html;
 }
 
-function register_routes( $app ) {
-	$app->get( '/', function( $request, $response ) {
-		return $response->write( render('home.php') );
-	} );
+function register_routes($app)
+{
+    $app->get('/', function ($request, $response) {
+        return $response->write(render('home.php'));
+    });
 
-	$app->get( '/js-delayed-visibility', function( $request, $response ) {
-		return $response->write( render( 'js-delayed-visibility.php' ) );
-	} );
+    $app->get('/js-delayed-visibility', function ($request, $response) {
+        return $response->write(render('js-delayed-visibility.php'));
+    });
 
-	$app->get( '/js-dom-mod', function( $request, $response ) {
-		return $response->write( render( 'js-dom-mod.php' ) );
-	} );
+    $app->get('/js-dom-mod', function ($request, $response) {
+        return $response->write(render('js-dom-mod.php'));
+    });
 
-	$app->get( '/status-200', function( $request, $response ) {
-		return $response->write( render( 'status-code.php', [ 'status' => 200 ] ) );
-	} );
+    $app->get('/status-200', function ($request, $response) {
+        return $response->write(render('status-code.php', [ 'status' => 200 ]));
+    });
 }
 
-register_routes( $app );
+register_routes($app);
 
 $app->run();
