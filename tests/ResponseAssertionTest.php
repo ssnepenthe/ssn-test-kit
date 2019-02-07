@@ -2,9 +2,10 @@
 
 namespace SsnTestKit\Tests;
 
-use PHPUnit\Framework\TestCase;
 use SsnTestKit\Response;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\DomCrawler\Crawler;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\ExpectationFailedException;
 use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 
@@ -29,110 +30,133 @@ class ResponseAssertionTest extends TestCase
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_informational()
+    public function it_can_assert_response_is_informational()
     {
-        // @todo Weird pattern... This is technically making an extra assertion which fails but
-        // results in the PHPUnit assertion count being incremented while the failure count is not.
-
-        $informational = $this->makeResponse(101);
-        $nonInformational = $this->makeResponse();
-
-        $informational->assertInformational();
-        $this->assertExpectationFailedExceptionIsThrownFor(
-            [$nonInformational, 'assertInformational']
-        );
+        $this->makeResponse(101)->assertInformational();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_successful()
+    public function it_can_fail_to_assert_response_is_informational()
     {
-        $successful = $this->makeResponse();
-        $nonSuccessful = $this->makeResponse(101);
+        $this->expectException(AssertionFailedError::class);
 
-        $successful->assertSuccessful();
-        $this->assertExpectationFailedExceptionIsThrownFor([$nonSuccessful, 'assertSuccessful']);
+        $this->makeResponse()->assertInformational();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_a_redirection()
+    public function it_can_assert_response_is_successful()
     {
-        $redirection = $this->makeResponse(301);
-        $nonRedirection = $this->makeResponse();
-
-        $redirection->assertRedirection();
-        $this->assertExpectationFailedExceptionIsThrownFor([$nonRedirection, 'assertRedirection']);
+        $this->makeResponse()->assertSuccessful();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_a_client_error()
+    public function it_can_fail_to_assert_response_is_successful()
     {
-        $clientError = $this->makeResponse(401);
-        $nonClientError = $this->makeResponse();
+        $this->expectException(AssertionFailedError::class);
 
-        $clientError->assertClientError();
-        $this->assertExpectationFailedExceptionIsThrownFor([$nonClientError, 'assertClientError']);
+        $this->makeResponse(101)->assertSuccessful();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_a_server_error()
+    public function it_can_assert_response_is_a_redirection()
     {
-        $serverError = $this->makeResponse(501);
-        $nonServerError = $this->makeResponse();
-
-        $serverError->assertServerError();
-        $this->assertExpectationFailedExceptionIsThrownFor([$nonServerError, 'assertServerError']);
+        $this->makeResponse(301)->assertRedirection();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_has_a_specific_status_code()
+    public function it_can_fail_to_assert_response_is_a_redirection()
     {
-        $twoHundred = $this->makeResponse();
-        $twoOhOne = $this->makeResponse(201);
-        $e = null;
+        $this->expectException(AssertionFailedError::class);
 
-        $twoHundred->assertStatus(200);
-
-        try {
-            $twoOhOne->assertStatus(200);
-        } catch (\Exception $e) {
-            // ...
-        }
-
-        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+        $this->makeResponse()->assertRedirection();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_ok()
+    public function it_can_assert_response_is_a_client_error()
     {
-        $twoHundred = $this->makeResponse();
-        $twoOhOne = $this->makeResponse(201);
-
-        $twoHundred->assertOk();
-        $this->assertExpectationFailedExceptionIsThrownFor([$twoOhOne, 'assertOk']);
+        $this->makeResponse(401)->assertClientError();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_forbidden()
+    public function it_can_fail_to_assert_response_is_a_client_error()
     {
-        $fourOhThree = $this->makeResponse(403);
-        $twoHundred = $this->makeResponse();
+        $this->expectException(AssertionFailedError::class);
 
-        $fourOhThree->assertForbidden();
-        $this->assertExpectationFailedExceptionIsThrownFor([$twoHundred, 'assertForbidden']);
+        $this->makeResponse()->assertClientError();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_not_found()
+    public function it_can_assert_response_is_a_server_error()
     {
-        $fourOhFour = $this->makeResponse(404);
-        $twoHundred = $this->makeResponse();
-
-        $fourOhFour->assertNotFound();
-        $this->assertExpectationFailedExceptionIsThrownFor([$twoHundred, 'assertNotFound']);
+        $this->makeResponse(501)->assertServerError();
     }
 
     /** @test */
-    public function it_can_assert_that_a_response_is_a_redirect()
+    public function it_can_fail_to_assert_response_is_a_server_error()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse()->assertServerError();
+    }
+
+    /** @test */
+    public function it_can_assert_response_has_a_specific_status_code()
+    {
+        $this->makeResponse()->assertStatus(200);
+    }
+
+    /** @test */
+    public function is_can_fail_to_assert_response_has_a_specific_status_code()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse(201)->assertStatus(200);
+    }
+
+    /** @test */
+    public function it_can_assert_response_is_ok()
+    {
+        $this->makeResponse()->assertOk();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_response_is_ok()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse(201)->assertOk();
+    }
+
+    /** @test */
+    public function it_can_assert_response_is_forbidden()
+    {
+        $this->makeResponse(403)->assertForbidden();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_response_is_forbidden()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse()->assertForbidden();
+    }
+
+    /** @test */
+    public function it_can_assert_response_is_not_found()
+    {
+        $this->makeResponse(404)->assertNotFound();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_response_is_not_found()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse()->assertNotFound();
+    }
+
+    /** @test */
+    public function it_can_assert_response_is_a_redirect()
     {
         foreach ([201, 301, 302, 303, 307, 308] as $status) {
             $response = new Response(
@@ -143,31 +167,32 @@ class ResponseAssertionTest extends TestCase
             $response->assertRedirect();
             $response->assertRedirect('http://localhost/redirect');
         }
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_response_is_a_redirect_based_on_status()
+    {
+        $this->expectException(AssertionFailedError::class);
 
         $response = new Response(
             new BrowserKitResponse('', 200, ['Location' => 'http://localhost/redirect']),
             new Crawler()
         );
-        $e = null;
 
-        try {
-            $response->assertRedirect();
-        } catch (\Exception $e) {
-            // ...
-        }
+        $response->assertRedirect();
+    }
 
-        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    /** @test */
+    public function it_can_fail_to_assert_response_is_a_redirect_based_on_location()
+    {
+        $this->expectException(AssertionFailedError::class);
 
-        $e = null;
+        $response = new Response(
+            new BrowserKitResponse('', 301, ['Location' => 'http://localhost/redirect']),
+            new Crawler()
+        );
 
-        try {
-            // Shouldn't matter because status code doesn't match.
-            $response->assertRedirect('http://localhost/redirect');
-        } catch (\Exception $e) {
-            // ...
-        }
-
-        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+        $response->assertRedirect('http://localhost/different/location');
     }
 
     /** @test */
