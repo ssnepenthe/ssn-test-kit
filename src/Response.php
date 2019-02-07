@@ -20,6 +20,7 @@ class Response
 
     public function content()
     {
+        // @todo Verify with panther responses - this should be a string, presumably before js execution?
         return $this->response->getContent();
     }
 
@@ -234,6 +235,34 @@ class Response
             null === $header || [] === $header,
             "Unexpected header {$name} is present on response"
         );
+
+        return $this;
+    }
+
+    public function assertSee(string $value)
+    {
+        Assert::assertStringContainsString($value, $this->content());
+
+        return $this;
+    }
+
+    public function assertSeeText(string $value)
+    {
+        Assert::assertStringContainsString($value, strip_tags($this->content()));
+
+        return $this;
+    }
+
+    public function assertDontSee(string $value)
+    {
+        Assert::assertStringNotContainsString($value, $this->content());
+
+        return $this;
+    }
+
+    public function assertDontSeeText(string $value)
+    {
+        Assert::assertStringNotContainsString($value, strip_tags($this->content()));
 
         return $this;
     }

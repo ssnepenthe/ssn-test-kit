@@ -242,4 +242,135 @@ class ResponseAssertionTest extends TestCase
 
         $this->assertInstanceOf(ExpectationFailedException::class, $e);
     }
+
+    /** @test */
+    public function it_can_assert_that_a_string_is_present()
+    {
+        $response = new Response(
+            new BrowserKitResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!'),
+            new Crawler()
+        );
+
+        $response->assertSee('Lions');
+        $response->assertSee('tigers');
+
+        $e = null;
+
+        try {
+            // Case sensitive.
+            $response->assertSee('lions');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+
+        $e = null;
+
+        try {
+            // Absent.
+            $response->assertSee('wolves');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+
+        $e = null;
+
+        try {
+            // Tags in the way.
+            $response->assertSee('tigers and bears');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_string_is_present_after_removing_tags()
+    {
+        $response = new Response(
+            new BrowserKitResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!'),
+            new Crawler()
+        );
+
+        $response->assertSeeText('Lions and tigers');
+        $response->assertSeeText('tigers and bears');
+
+        $e = null;
+
+        try {
+            // Case sensitive.
+            $response->assertSeeText('lions and tigers');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+
+        $e = null;
+
+        try {
+            // Absent.
+            $response->assertSeeText('tigers and wolves');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_string_is_absent()
+    {
+        $response = new Response(
+            new BrowserKitResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!'),
+            new Crawler()
+        );
+
+        $response->assertDontSee('wolves');
+
+        // Case sensitive.
+        $response->assertDontSee('lions');
+
+        // Tags in the way.
+        $response->assertDontSee('tigers and bears');
+
+        $e = null;
+
+        try {
+            $response->assertDontSee('Lions');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_string_is_absent_after_removing_tags()
+    {
+        $response = new Response(
+            new BrowserKitResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!'),
+            new Crawler()
+        );
+
+        $response->assertDontSeeText('tigers and wolves');
+
+        // Case sensitive.
+        $response->assertDontSeeText('lions and tigers');
+
+        $e = null;
+
+        try {
+            // Case sensitive.
+            $response->assertDontSeeText('Lions and tigers');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
 }
