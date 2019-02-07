@@ -169,4 +169,77 @@ class ResponseAssertionTest extends TestCase
 
         $this->assertInstanceOf(ExpectationFailedException::class, $e);
     }
+
+    /** @test */
+    public function it_can_assert_that_a_header_is_present()
+    {
+        $response = new Response(
+            new BrowserKitResponse('', 200, ['apple' => 'red']),
+            new Crawler()
+        );
+        $e = null;
+
+        $response->assertHeader('apple');
+
+        try {
+            $response->assertHeader('banana');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_header_is_present_and_set_to_a_specific_value()
+    {
+        $response = new Response(
+            new BrowserKitResponse('', 200, ['apple' => 'red']),
+            new Crawler()
+        );
+        $e = null;
+
+        // Matching name => value pair.
+        $response->assertHeader('apple', 'red');
+
+        try {
+            // Name is present, value is wrong.
+            $response->assertHeader('apple', 'yellow');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+
+        $e = null;
+
+        try {
+            // Name is absent.
+            $response->assertHeader('banana', 'yellow');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_header_is_absent()
+    {
+        $response = new Response(
+            new BrowserKitResponse('', 200, ['apple' => 'red']),
+            new Crawler()
+        );
+        $e = null;
+
+        $response->assertHeaderMissing('banana');
+
+        try {
+            $response->assertHeaderMissing('apple');
+        } catch (\Exception $e) {
+            // ...
+        }
+
+        $this->assertInstanceOf(ExpectationFailedException::class, $e);
+    }
 }

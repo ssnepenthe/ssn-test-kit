@@ -205,4 +205,36 @@ class Response
 
         return $this;
     }
+
+    public function assertHeader(string $name, $value = null)
+    {
+        $header = $this->header($name);
+
+        Assert::assertTrue(
+            null !== $header && [] !== $header,
+            "Header {$name} is not present on response"
+        );
+
+        if (null !== $value) {
+            Assert::assertEquals(
+                $value,
+                $header,
+                "Header {$name} was found but value does not match expected {$value}"
+            );
+        }
+
+        return $this;
+    }
+
+    public function assertHeaderMissing(string $name)
+    {
+        $header = $this->header($name);
+
+        Assert::assertTrue(
+            null === $header || [] === $header,
+            "Unexpected header {$name} is present on response"
+        );
+
+        return $this;
+    }
 }
