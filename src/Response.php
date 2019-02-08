@@ -246,9 +246,23 @@ class Response
         return $this;
     }
 
+    public function assertSeeInOrder(array $values)
+    {
+        Assert::assertThat($values, new SeeInOrder($this->content()));
+
+        return $this;
+    }
+
     public function assertSeeText(string $value)
     {
         Assert::assertStringContainsString($value, strip_tags($this->content()));
+
+        return $this;
+    }
+
+    public function assertSeeTextInOrder(array $values)
+    {
+        Assert::assertThat($values, new SeeInOrder(strip_tags($this->content())));
 
         return $this;
     }

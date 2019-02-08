@@ -277,6 +277,31 @@ class ResponseAssertionTest extends TestCase
     }
 
     /** @test */
+    public function it_can_assert_many_strings_are_present_in_order()
+    {
+        $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
+            ->assertSeeInOrder(['Lions', 'tigers', 'bears']);
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_many_strings_are_present_in_order()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
+            ->assertSeeInOrder(['tigers', 'bears', 'Lions']);
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_many_strings_are_present_in_order_due_to_tag_interference()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
+            ->assertSeeInOrder(['Lions and', 'tigers', 'bears']);
+    }
+
+    /** @test */
     public function it_can_assert_string_is_present_after_removing_tags()
     {
         $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
@@ -300,6 +325,22 @@ class ResponseAssertionTest extends TestCase
 
         $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
             ->assertSeeText('lions and tigers');
+    }
+
+    /** @test */
+    public function it_can_assert_many_strings_are_present_in_order_after_removing_tags()
+    {
+        $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
+            ->assertSeeTextInOrder(['Lions and', 'tigers and', 'bears, oh my!']);
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_many_strings_are_present_in_order_after_removing_tags()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse('<em>Lions</em> and <em>tigers<em> and <em>bears</em>, oh my!')
+            ->assertSeeTextInOrder(['tigers and', 'Lions and', 'bears, oh my!']);
     }
 
     /** @test */
