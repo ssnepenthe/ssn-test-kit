@@ -11,11 +11,13 @@ use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 
 class ResponseInitializationTest extends TestCase
 {
+    use MakesResponses;
+
     /** @test */
     public function it_provides_access_to_the_raw_response_content()
     {
-        $empty = new Response(new BrowserKitResponse(), new Crawler());
-        $full = new Response(new BrowserKitResponse('Test Content'), new Crawler());
+        $empty = $this->makeResponse();
+        $full = $this->makeResponse('Test Content');
 
         // @todo Check on panther... I think this is initial page content so probably before JS execution...
         $this->assertEquals('', $empty->content());
@@ -25,8 +27,8 @@ class ResponseInitializationTest extends TestCase
     /** @test */
     public function it_provides_access_to_the_raw_status_code()
     {
-        $twoHundred = new Response(new BrowserKitResponse(), new Crawler());
-        $fourOhFour = new Response(new BrowserKitResponse('', 404), new Crawler());
+        $twoHundred = $this->makeResponse();
+        $fourOhFour = $this->makeResponse(404);
 
         $this->assertSame(200, $twoHundred->status());
         $this->assertSame(404, $fourOhFour->status());
@@ -37,10 +39,7 @@ class ResponseInitializationTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $response = new Response(
-            new BrowserKitResponse(),
-            new PantherCrawler([], $this->createMock(WebDriver::class))
-        );
+        $response = $this->makePantherResponse();
 
         $response->status();
     }
@@ -48,11 +47,13 @@ class ResponseInitializationTest extends TestCase
     /** @test */
     public function it_provides_access_to_single_response_headers()
     {
-        $empty = new Response(new BrowserKitResponse(), new Crawler());
-        $full = new Response(
-            new BrowserKitResponse('', 200, ['one' => 'first', 'two' => 'second']),
-            new Crawler()
-        );
+        $empty = $this->makeResponse();
+        $full = $this->makeResponse([
+            'headers' => [
+                'one' => 'first',
+                'two' => 'second',
+            ],
+        ]);
 
         $this->assertNull($empty->header('one'));
         $this->assertEquals('first', $full->header('one'));
@@ -63,14 +64,13 @@ class ResponseInitializationTest extends TestCase
     public function it_normalizes_header_names_when_retrieving_a_single_header()
     {
         // Header name is converted to lowercase and '-' is replaced with '_'.
-        $response = new Response(
-            new BrowserKitResponse('', 200, [
+        $response = $this->makeResponse([
+            'headers' => [
                 'Header-One' => 'Value one',
                 'Header_Two' => 'Value two',
                 'header-three' => 'Value three',
-            ]),
-            new Crawler()
-        );
+            ],
+        ]);
 
         $this->assertEquals('Value one', $response->header('Header-One'));
         $this->assertEquals('Value one', $response->header('Header_One'));
@@ -93,10 +93,7 @@ class ResponseInitializationTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $response = new Response(
-            new BrowserKitResponse(),
-            new PantherCrawler([], $this->createMock(WebDriver::class))
-        );
+        $response = $this->makePantherResponse();
 
         $response->header('one');
     }
@@ -104,11 +101,13 @@ class ResponseInitializationTest extends TestCase
     /** @test */
     public function it_provides_access_to_the_raw_response_headers()
     {
-        $empty = new Response(new BrowserKitResponse(), new Crawler());
-        $full = new Response(
-            new BrowserKitResponse('', 200, ['one' => 'first', 'two' => 'second']),
-            new Crawler()
-        );
+        $empty = $this->makeResponse();
+        $full = $this->makeResponse([
+            'headers' => [
+                'one' => 'first',
+                'two' => 'second',
+            ],
+        ]);
 
         $this->assertEquals([], $empty->headers());
         $this->assertEquals(['one' => 'first', 'two' => 'second'], $full->headers());
@@ -119,10 +118,7 @@ class ResponseInitializationTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
 
-        $response = new Response(
-            new BrowserKitResponse(),
-            new PantherCrawler([], $this->createMock(WebDriver::class))
-        );
+        $response = $this->makePantherResponse();
 
         $response->headers();
     }
@@ -131,7 +127,7 @@ class ResponseInitializationTest extends TestCase
     public function it_provides_access_to_a_dom_crawler_instance()
     {
         $crawler = new Crawler();
-        $response = new Response(new BrowserKitResponse(), $crawler);
+        $response = $this->makeResponse([], null, $crawler);
 
         $this->assertInstanceOf(Crawler::class, $response->crawler());
         $this->assertSame($crawler, $response->crawler());
@@ -141,7 +137,7 @@ class ResponseInitializationTest extends TestCase
     public function it_provides_access_to_the_browser_kit_response_object()
     {
         $bk = new BrowserKitResponse();
-        $response = new Response($bk, new Crawler());
+        $response = $this->makeResponse([], $bk);
 
         $this->assertInstanceOf(BrowserKitResponse::class, $response->unwrap());
         $this->assertSame($bk, $response->unwrap());
@@ -150,11 +146,8 @@ class ResponseInitializationTest extends TestCase
     /** @test */
     public function it_knows_whether_a_response_was_generated_by_panther()
     {
-        $goutte = new Response(new BrowserKitResponse(), new Crawler());
-        $panther = new Response(
-            new BrowserKitResponse(),
-            new PantherCrawler([], $this->createMock(WebDriver::class))
-        );
+        $goutte = $this->makeResponse();
+        $panther = $this->makePantherResponse();
 
         $this->assertFalse($goutte->isPanther());
         $this->assertTrue($panther->isPanther());

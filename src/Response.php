@@ -3,69 +3,86 @@
 namespace SsnTestKit;
 
 use PHPUnit\Framework\Assert;
-use Symfony\Component\DomCrawler\Crawler as DomCrawler;
-use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
-use Symfony\Component\Panther\DomCrawler\Crawler as PantherDomCrawler;
+use Symfony\Component\BrowserKit\Client;
+use Symfony\Component\Panther\DomCrawler\Crawler;
 
 class Response
 {
-    protected $crawler;
-    protected $response;
+    protected $client;
 
-    public function __construct(BrowserKitResponse $response, DomCrawler $crawler)
+    public function __construct(Client $client)
     {
-        $this->response = $response;
-        $this->crawler = $crawler;
+        $this->client = $client;
+    }
+
+    public function client()
+    {
+        return $this->client;
     }
 
     public function content()
     {
-        // @todo Verify with panther responses - this should be a string, presumably before js execution?
-        return $this->response->getContent();
+        if ($this->isPanther()) {
+            // We can't rely on $this->unwrap()->getContent() when using panther - The response may
+            // have been built before JavaScript execution has completed.
+            //
+            // Here we access the web driver instance directly for the page source.
+            //
+            // Not sure if this is preferable or we should try something like
+            // $this->crawler()->html().
+            //
+            // @todo Get some automated tests set up for this.
+            return $this->client->getWebDriver()->getPageSource();
+        }
+
+        return $this->unwrap()->getContent();
     }
 
     public function status()
     {
         $this->throwForPanther('status');
 
-        return $this->response->getStatus();
+        return $this->unwrap()->getStatus();
     }
 
     public function header(string $header, bool $first = true)
     {
         $this->throwForPanther('headers');
 
-        return $this->response->getHeader($header, $first);
+        return $this->unwrap()->getHeader($header, $first);
     }
 
     public function headers()
     {
         $this->throwForPanther('headers');
 
-        return $this->response->getHeaders();
+        return $this->unwrap()->getHeaders();
     }
 
     public function crawler()
     {
-        return $this->crawler;
+        return $this->client->getCrawler();
     }
 
     public function unwrap()
     {
-        return $this->response;
+        return $this->client->getInternalResponse();
     }
 
     public function isPanther()
     {
-        return $this->crawler instanceof PantherDomCrawler;
+        // Maybe not ideal - by testing $this->crawler() instead of $this->client I am able to avoid
+        // situations where I would otherwise be trying to mock a (final) panther client object.
+        return $this->crawler() instanceof Crawler;
     }
 
     protected function throwForPanther(string $property)
     {
         if ($this->isPanther()) {
-            // @todo Better to throw SkippedTestError for PHPUnit's sake?
+            // @todo Better to throw SkippedTestError for PHPUnit's sake? Or something specific to
+            //       this package to avoid accidental catches?
             throw new \RuntimeException(
-                "Response {$property} is not available for inspection when using Panther"
+                "Response {$property} not available for inspection when using Panther"
             );
         }
     }

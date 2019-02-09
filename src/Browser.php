@@ -122,10 +122,7 @@ class Browser
         // creating a test response instance...
         //
         // If we keep the crawler, may akso want to also include cookie jar?
-        return new Response(
-            $this->client()->getInternalResponse(),
-            $this->client()->getCrawler()
-        );
+        return new Response($this->client());
     }
 
     // @todo Json variants?

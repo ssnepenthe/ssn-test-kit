@@ -10,10 +10,7 @@ use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 
 class ResponseStatusTest extends TestCase
 {
-    protected function createResponse($status)
-    {
-        return new Response(new BrowserKitResponse('', $status), new Crawler());
-    }
+    use MakesResponses;
 
     protected function getStatusBlocksForRange($lower, $upper)
     {
@@ -47,11 +44,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(100, 200);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isInformational());
+            $this->assertTrue($this->makeResponse($status)->isInformational());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isInformational());
+            $this->assertFalse($this->makeResponse($status)->isInformational());
         }
     }
 
@@ -61,11 +58,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(200, 300);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isSuccessful());
+            $this->assertTrue($this->makeResponse($status)->isSuccessful());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isSuccessful());
+            $this->assertFalse($this->makeResponse($status)->isSuccessful());
         }
     }
 
@@ -75,11 +72,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(300, 400);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isRedirection());
+            $this->assertTrue($this->makeResponse($status)->isRedirection());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isRedirection());
+            $this->assertFalse($this->makeResponse($status)->isRedirection());
         }
     }
 
@@ -89,11 +86,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(400, 500);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isClientError());
+            $this->assertTrue($this->makeResponse($status)->isClientError());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isClientError());
+            $this->assertFalse($this->makeResponse($status)->isClientError());
         }
     }
 
@@ -103,11 +100,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(500, 600);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isServerError());
+            $this->assertTrue($this->makeResponse($status)->isServerError());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isServerError());
+            $this->assertFalse($this->makeResponse($status)->isServerError());
         }
     }
 
@@ -117,11 +114,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(200, 201);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isOk());
+            $this->assertTrue($this->makeResponse($status)->isOk());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isOk());
+            $this->assertFalse($this->makeResponse($status)->isOk());
         }
     }
 
@@ -131,11 +128,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(403, 404);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isForbidden());
+            $this->assertTrue($this->makeResponse($status)->isForbidden());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isForbidden());
+            $this->assertFalse($this->makeResponse($status)->isForbidden());
         }
     }
 
@@ -145,11 +142,11 @@ class ResponseStatusTest extends TestCase
         list($desired, $rest) = $this->getStatusBlocksForRange(404, 405);
 
         foreach ($desired as $status) {
-            $this->assertTrue($this->createResponse($status)->isNotFound());
+            $this->assertTrue($this->makeResponse($status)->isNotFound());
         }
 
         foreach ($rest as $status) {
-            $this->assertFalse($this->createResponse($status)->isNotFound());
+            $this->assertFalse($this->makeResponse($status)->isNotFound());
         }
     }
 
@@ -169,15 +166,11 @@ class ResponseStatusTest extends TestCase
         });
 
         foreach ($desired as $status) {
-            $withoutLocation = new Response(
-                new BrowserKitResponse('', $status),
-                new Crawler()
-            );
-
-            $withLocation = new Response(
-                new BrowserKitResponse('', $status, ['location' => '/test']),
-                new Crawler()
-            );
+            $withoutLocation = $this->makeResponse($status);
+            $withLocation = $this->makeResponse([
+                'status' => $status,
+                'headers' => ['location' => '/test'],
+            ]);
 
             $this->assertTrue($withoutLocation->isRedirect());
             $this->assertTrue($withLocation->isRedirect());
@@ -187,15 +180,11 @@ class ResponseStatusTest extends TestCase
         }
 
         foreach ($rest as $status) {
-            $withoutLocation = new Response(
-                new BrowserKitResponse('', $status),
-                new Crawler()
-            );
-
-            $withLocation = new Response(
-                new BrowserKitResponse('', $status, ['location' => '/test']),
-                new Crawler()
-            );
+            $withoutLocation = $this->makeResponse($status);
+            $withLocation = $this->makeResponse([
+                'status' => $status,
+                'headers' => ['location' => '/test'],
+            ]);
 
             $this->assertFalse($withoutLocation->isRedirect());
             $this->assertFalse($withLocation->isRedirect());

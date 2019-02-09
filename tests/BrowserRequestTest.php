@@ -6,7 +6,6 @@ use SsnTestKit\Browser;
 use SsnTestKit\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
-use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 
 // @todo Skip when slim server isn't running?
 class BrowserRequestTest extends TestCase

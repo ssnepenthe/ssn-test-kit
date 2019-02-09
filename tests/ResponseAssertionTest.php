@@ -2,31 +2,12 @@
 
 namespace SsnTestKit\Tests;
 
-use SsnTestKit\Response;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DomCrawler\Crawler;
 use PHPUnit\Framework\AssertionFailedError;
-use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 
 class ResponseAssertionTest extends TestCase
 {
-    protected function makeResponse($args = [])
-    {
-        if (is_string($args)) {
-            $args = ['content' => $args];
-        } elseif (is_int($args)) {
-            $args = ['status' => $args];
-        }
-
-        return new Response(
-            new BrowserKitResponse(
-                $args['content'] ?? '',
-                $args['status'] ?? 200,
-                $args['headers'] ?? []
-            ),
-            new Crawler()
-        );
-    }
+    use MakesResponses;
 
     /** @test */
     public function it_can_assert_response_is_informational()
