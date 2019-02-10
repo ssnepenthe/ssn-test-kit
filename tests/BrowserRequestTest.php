@@ -135,7 +135,7 @@ class BrowserRequestTest extends TestCase
             $response = $browser->request('GET', 'http://localhost/js-delayed-visibility');
 
             $start = microtime(true);
-            $browser->waitFor('.test');
+            $response->waitFor('.test');
             $end = microtime(true);
 
             // Sanity.

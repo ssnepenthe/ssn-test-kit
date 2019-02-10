@@ -165,17 +165,4 @@ class Browser
             $change_history
         );
     }
-
-    public function waitFor(
-        string $cssSelector,
-        int $timeoutInSeconds = 30,
-        int $intervalInMilliseconds = 250
-    ) {
-        if (! $this->withJavascript) {
-            throw new \RuntimeException('You must enable JavaScript to wait for an element');
-        }
-
-        // @todo Think about return value...
-        return $this->panther()->waitFor($cssSelector, $timeoutInSeconds, $intervalInMilliseconds);
-    }
 }

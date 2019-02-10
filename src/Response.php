@@ -87,6 +87,22 @@ class Response
         }
     }
 
+    public function waitFor(
+        string $cssSelector,
+        int $timeoutInSeconds = 30,
+        int $intervalInMilliseconds = 250
+    ) {
+        if (! $this->isPanther()) {
+            throw new \RuntimeException(
+                'It is not possible to wait for an element to become visible when using Goutte'
+            );
+        }
+
+        $this->client->waitFor($cssSelector, $timeoutInSeconds, $intervalInMilliseconds);
+
+        return $this;
+    }
+
     public function isInformational()
     {
         return $this->status() >= 100 && $this->status() < 200;
