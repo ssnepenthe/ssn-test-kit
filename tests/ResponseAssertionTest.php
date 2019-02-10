@@ -3,7 +3,9 @@
 namespace SsnTestKit\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\BrowserKit\Cookie;
 use PHPUnit\Framework\AssertionFailedError;
+use Symfony\Component\BrowserKit\CookieJar;
 
 class ResponseAssertionTest extends TestCase
 {
@@ -220,6 +222,60 @@ class ResponseAssertionTest extends TestCase
         $this->expectException(AssertionFailedError::class);
 
         $this->makeResponse(['headers' => ['apple' => 'red']])->assertHeaderMissing('apple');
+    }
+
+    /** @test */
+    public function it_can_assert_cookie_is_present()
+    {
+        $cookieJar = new CookieJar();
+        $cookieJar->set(new Cookie('testcookie', 'testvalue'));
+
+        $this->makeResponse([], null, $cookieJar)->assertCookie('testcookie');
+    }
+
+    /** @test */
+    public function it_can_assert_cookie_is_present_and_set_to_specfic_value()
+    {
+        $cookieJar = new CookieJar();
+        $cookieJar->set(new Cookie('testcookie', 'testvalue'));
+
+        $this->makeResponse([], null, $cookieJar)->assertCookie('testcookie', 'testvalue');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_cookie_is_present()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $this->makeResponse()->assertCookie('testcookie');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_cookie_is_present_when_value_does_not_match()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $cookieJar = new CookieJar();
+        $cookieJar->set(new Cookie('testcookie', 'testvalue'));
+
+        $this->makeResponse([], null, $cookieJar)->assertCookie('testcookie', 'wrongvalue');
+    }
+
+    /** @test */
+    public function it_can_assert_cookie_is_absent()
+    {
+        $this->makeResponse()->assertCookieMissing('testcookie');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_cookie_is_absent()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $cookieJar = new CookieJar();
+        $cookieJar->set(new Cookie('testcookie', 'testvalue'));
+
+        $this->makeResponse([], null, $cookieJar)->assertCookieMissing('testcookie');
     }
 
     /** @test */

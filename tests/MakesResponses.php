@@ -6,7 +6,9 @@ use SsnTestKit\Response;
 use Facebook\WebDriver\WebDriver;
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\BrowserKit\CookieJar;
 use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
+use Symfony\Component\Panther\Cookie\CookieJar as PantherCookieJar;
 use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 
 trait MakesResponses
@@ -14,6 +16,7 @@ trait MakesResponses
     protected function makeResponse(
         $args = [],
         BrowserKitResponse $bkResponse = null,
+        CookieJar $cookieJar = null,
         Crawler $crawler = null
     ) {
         if (is_string($args)) {
@@ -24,15 +27,24 @@ trait MakesResponses
 
         $client = $this->createMock(Client::class);
 
-        $client->method('getInternalResponse')
-            ->willReturn($bkResponse ?? new BrowserKitResponse(
+        if (null === $bkResponse) {
+            $bkResponse = new BrowserKitResponse(
                 $args['content'] ?? '',
                 $args['status'] ?? 200,
                 $args['headers'] ?? []
-            ));
+            );
+        }
 
-        $client->method('getCrawler')
-            ->willReturn($crawler ?? new Crawler());
+        $client->method('getInternalResponse')->willReturn($bkResponse);
+
+        if (null === $cookieJar) {
+            $cookieJar = new CookieJar();
+            $cookieJar->updateFromResponse($bkResponse);
+        }
+
+        $client->method('getCookieJar')->willReturn($cookieJar);
+
+        $client->method('getCrawler')->willReturn($crawler ?? new Crawler());
 
         return new Response($client);
     }
@@ -40,12 +52,16 @@ trait MakesResponses
     protected function makePantherResponse(
         $args = [],
         BrowserKitResponse $bkResponse = null,
+        PantherCookieJar $cookieJar = null,
         PantherCrawler $crawler = null
     ) {
+        $webdriver = $this->createMock(WebDriver::class);
+
         return $this->makeResponse(
             $args,
             $bkResponse,
-            $crawler ?? new PantherCrawler([], $this->createMock(WebDriver::class))
+            $cookieJar ?? new PantherCookieJar($webdriver),
+            $crawler ?? new PantherCrawler([], $webdriver)
         );
     }
 }

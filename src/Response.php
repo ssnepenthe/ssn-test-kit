@@ -38,6 +38,16 @@ class Response
         return $this->unwrap()->getContent();
     }
 
+    public function cookie($name, $path = '/', $domain = null)
+    {
+        return $this->client->getCookieJar()->get($name, $path, $domain);
+    }
+
+    public function cookies()
+    {
+        return $this->client->getCookieJar()->all();
+    }
+
     public function status()
     {
         $this->throwForPanther('status');
@@ -268,6 +278,32 @@ class Response
             null === $header || [] === $header,
             "Unexpected header {$name} is present on response"
         );
+
+        return $this;
+    }
+
+    public function assertCookie(string $name, $value = null)
+    {
+        $cookie = $this->cookie($name);
+
+        Assert::assertNotNull($cookie, "Cookie {$name} not present on response");
+
+        if (null !== $value) {
+            $actual = $cookie->getValue();
+
+            Assert::assertEquals(
+                $value,
+                $actual,
+                "Cookie {$name} was found but value does not match expected {$value}"
+            );
+        }
+
+        return $this;
+    }
+
+    public function assertCookieMissing(string $name)
+    {
+        Assert::assertNull($this->cookie($name), "Unexpected cookie {$name} present on response");
 
         return $this;
     }

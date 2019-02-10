@@ -2,10 +2,12 @@
 
 namespace SsnTestKit\Tests;
 
+use SsnTestKit\Response;
 use PHPUnit\Framework\TestCase;
 use Facebook\WebDriver\WebDriver;
-use SsnTestKit\Response;
+use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\BrowserKit\CookieJar;
 use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 use Symfony\Component\Panther\DomCrawler\Crawler as PantherCrawler;
 
@@ -22,6 +24,34 @@ class ResponseInitializationTest extends TestCase
         // @todo Check on panther... I think this is initial page content so probably before JS execution...
         $this->assertEquals('', $empty->content());
         $this->assertEquals('Test Content', $full->content());
+    }
+
+    /** @test */
+    public function it_provides_access_to_single_cookie()
+    {
+        $cookieJar = new CookieJar();
+        $cookieJar->set($cookie = new Cookie('singlecookietest', 'testvalue'));
+
+        $response = $this->makeResponse([], null, $cookieJar);
+
+        $this->assertSame($cookie, $response->cookie('singlecookietest'));
+        $this->assertNull($response->cookie('nonexistent'));
+    }
+
+    /** @test */
+    public function it_provides_access_to_all_cookies()
+    {
+        $cookieJar = new CookieJar();
+
+        $cookie1 = new Cookie('firstcookie', 'firstvalue');
+        $cookie2 = new Cookie('secondcookie', 'secondvalue');
+
+        $cookieJar->set($cookie1);
+        $cookieJar->set($cookie2);
+
+        $response = $this->makeResponse([], null, $cookieJar);
+
+        $this->assertEquals([$cookie1, $cookie2], $response->cookies());
     }
 
     /** @test */
@@ -127,7 +157,7 @@ class ResponseInitializationTest extends TestCase
     public function it_provides_access_to_a_dom_crawler_instance()
     {
         $crawler = new Crawler();
-        $response = $this->makeResponse([], null, $crawler);
+        $response = $this->makeResponse([], null, null, $crawler);
 
         $this->assertInstanceOf(Crawler::class, $response->crawler());
         $this->assertSame($crawler, $response->crawler());
