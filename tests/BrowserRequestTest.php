@@ -7,9 +7,28 @@ use SsnTestKit\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
 
-// @todo Skip when slim server isn't running?
 class BrowserRequestTest extends TestCase
 {
+    protected static $isServerAccessible;
+
+    public static function setUpBeforeClass() : void
+    {
+        try {
+            (new Browser())->get('http://localhost');
+
+            static::$isServerAccessible = true;
+        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+            static::$isServerAccessible = false;
+        }
+    }
+
+    public function setUp() : void
+    {
+        if (! static::$isServerAccessible) {
+            $this->markTestSkipped('The test server does not appear to be accessible');
+        }
+    }
+
     /** @test */
     public function it_wraps_responses()
     {
