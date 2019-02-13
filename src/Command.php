@@ -4,6 +4,10 @@ namespace SsnTestKit;
 
 class Command
 {
+    const STATUS_DEBUG = 'debug';
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETE = 'complete';
+
     protected $arguments = [];
     protected $command;
     protected $flags = [];
@@ -11,9 +15,45 @@ class Command
     protected $runner;
     protected $subCommands = [];
 
+    protected $status;
+    protected $exitCode = null;
+    protected $output = null;
+
     public function __construct($command)
     {
         $this->command = $command;
+
+        $this->setStatus(self::STATUS_PENDING);
+    }
+
+    public function setStatus(string $status)
+    {
+        $this->status = $status;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function setExitCode(int $code)
+    {
+        $this->exitCode = $code;
+    }
+
+    public function getExitCode()
+    {
+        return $this->exitCode;
+    }
+
+    public function setOutput(string $output)
+    {
+        $this->output = $output;
+    }
+
+    public function getOutput()
+    {
+        return $this->output;
     }
 
     public static function make($command)

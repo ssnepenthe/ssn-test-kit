@@ -9,6 +9,16 @@ use PHPUnit\Framework\TestCase;
 class CommandTest extends TestCase
 {
     /** @test */
+    public function verify_defaults()
+    {
+        $command = Command::make('ls');
+
+        $this->assertEquals(Command::STATUS_PENDING, $command->getStatus());
+        $this->assertNull($command->getExitCode());
+        $this->assertNull($command->getOutput());
+    }
+
+    /** @test */
     public function it_can_handle_simple_commands()
     {
         $this->assertEquals("'ls'", (string) Command::make('ls'));
@@ -80,6 +90,14 @@ class CommandTest extends TestCase
         $cmd->setRunner($cli);
 
         $this->assertEquals("'cmd'", $cmd->run());
+    }
+
+    /** @test */
+    public function it_throws_when_attempting_to_run_without_runner()
+    {
+        $this->expectException(\RuntimeException::class);
+
+        Command::make('cmd')->run();
     }
 
     /** @test */

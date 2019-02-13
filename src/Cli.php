@@ -14,14 +14,24 @@ class Cli implements CommandRunner
     protected $wpBinPath;
 
     // @todo Not certain what the API should look like long-term, let's keep it simple for now...
-    public function run(Command $command) : string
+    public function run(Command $command) : Command
     {
         // Should (hopefully) simplify testing.
         if ($this->debug) {
-            return (string) $command;
+            $command->setStatus(Command::STATUS_DEBUG);
+            $command->setExitCode(0);
+            $command->setOutput('');
+        } else {
+            $process = Process::fromShellCommandline((string) $command);
+
+            $process->run();
+
+            $command->setStatus(Command::STATUS_COMPLETE);
+            $command->setExitCode($process->getExitCode());
+            $command->setOutput($process->getOutput());
         }
 
-        return Process::fromShellCommandline((string) $command)->mustRun()->getOutput();
+        return $command;
     }
 
     public function wp()

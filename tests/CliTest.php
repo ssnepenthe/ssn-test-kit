@@ -22,18 +22,26 @@ class CliTest extends TestCase
     /** @test */
     public function it_can_run_a_command()
     {
-        $command = $this->createMock(Command::class);
+        $command = Command::make('cmd');
 
-        $command->method('__toString')->willReturn("'cmd'");
+        // Sanity.
+        $this->assertEquals(Command::STATUS_PENDING, $command->getStatus());
+        $this->assertNull($command->getExitCode());
+        $this->assertNull($command->getOutput());
 
-        $this->assertEquals("'cmd'", $this->makeCli()->run($command));
+        // Command is returned directly.
+        $this->assertEquals("'cmd'", (string) $this->makeCli()->run($command));
+
+        // State is adjusted as expected.
+        $this->assertEquals(Command::STATUS_DEBUG, $command->getStatus());
+        $this->assertSame(0, $command->getExitCode());
+        $this->assertSame('', $command->getOutput());
     }
 
     /** @test */
     public function it_can_create_a_base_wp_cli_command()
     {
-        $cli = $this->makeCli();
-        $cli->setWpBinPath('wp');
+        $cli = $this->makeCli('wp');
 
         // Plain.
         $this->assertEquals("'wp'", (string) $cli->wp());
@@ -43,7 +51,7 @@ class CliTest extends TestCase
         $this->assertEquals("'wp' '@one'", (string) $cli->wp());
 
         // Runner is already set.
-        $this->assertEquals("'wp' '@one'", $cli->wp()->run());
+        $this->assertInstanceOf(Command::class, $cli->wp()->run());
     }
 
     /** @test */

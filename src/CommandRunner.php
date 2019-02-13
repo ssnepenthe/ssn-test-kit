@@ -4,5 +4,5 @@ namespace SsnTestKit;
 
 interface CommandRunner
 {
-    public function run(Command $command) : string;
+    public function run(Command $command) : Command;
 }
