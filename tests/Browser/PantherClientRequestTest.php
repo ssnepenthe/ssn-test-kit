@@ -1,13 +1,12 @@
 <?php
 
-namespace SsnTestKit\Tests;
+namespace SsnTestKit\Tests\Browser;
 
 use SsnTestKit\Browser;
-use SsnTestKit\Response;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\UriInterface;
+use GuzzleHttp\Exception\GuzzleException;
 
-class BrowserRequestTest extends TestCase
+class PantherClientRequestTest extends TestCase
 {
     protected static $isServerAccessible;
 
@@ -17,7 +16,7 @@ class BrowserRequestTest extends TestCase
             (new Browser())->get('http://localhost');
 
             static::$isServerAccessible = true;
-        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        } catch (GuzzleException $e) {
             static::$isServerAccessible = false;
         }
     }
@@ -27,64 +26,6 @@ class BrowserRequestTest extends TestCase
         if (! static::$isServerAccessible) {
             $this->markTestSkipped('The test server does not appear to be accessible');
         }
-    }
-
-    /** @test */
-    public function it_wraps_responses()
-    {
-        $browser = new Browser();
-        $response = $browser->request('GET', 'http://localhost');
-
-        $this->assertInstanceOf(Response::class, $response);
-    }
-
-    /** @test */
-    public function it_can_make_requests()
-    {
-        $browser = new Browser();
-        $response = $browser->get('http://localhost');
-
-        $this->assertTrue($response->isSuccessful());
-    }
-
-    /** @test */
-    public function it_provides_shorthand_for_get_requests()
-    {
-        $browser = new Browser();
-        $response = $browser->get('http://localhost');
-
-        $this->assertEquals('GET', $browser->client()->getInternalRequest()->getMethod());
-    }
-
-    /** @test */
-    public function it_provides_shorthand_for_post_requests()
-    {
-        $browser = new Browser();
-        $response = $browser->post('http://localhost');
-
-        $this->assertEquals('POST', $browser->client()->getInternalRequest()->getMethod());
-    }
-
-    /** @test */
-    public function it_correctly_sets_the_base_uri_with_guzzle_for_goutte()
-    {
-        // Default.
-        $browser = new Browser();
-        $response = $browser->request('GET', 'http://localhost/status-200');
-
-        $this->assertNull($browser->client()->getClient()->getConfig('base_uri'));
-        $this->assertEquals('200', $response->crawler()->filter('p')->text());
-
-        // Custom.
-        $browser = new Browser('http://localhost');
-        $response = $browser->request('GET', '/status-200');
-
-        $guzzleBaseUri = $browser->client()->getClient()->getConfig('base_uri');
-
-        $this->assertInstanceOf(UriInterface::class, $guzzleBaseUri);
-        $this->assertEquals('http', $guzzleBaseUri->getScheme());
-        $this->assertEquals('localhost', $guzzleBaseUri->getHost());
-        $this->assertEquals('200', $response->crawler()->filter('p')->text());
     }
 
     /** @test */
@@ -108,15 +49,9 @@ class BrowserRequestTest extends TestCase
     }
 
     /** @test */
-    public function it_uses_the_correct_client_depending_on_javascript_configuration()
+    public function it_makes_requests_using_panther_when_javascript_is_enabled()
     {
-        $browser = new Browser();
-        $response = $browser->request('GET', 'http://localhost/js-dom-mod');
-
-        $this->assertFalse($response->isPanther());
-        $this->assertEquals('This is without JavaScript.', $response->crawler()->filter('p')->text());
-
-        $browser->enableJavascript();
+        $browser = (new Browser())->enableJavascript();
         $response = $browser->request('GET', 'http://localhost/js-dom-mod');
 
         $this->assertTrue($response->isPanther());
