@@ -13,7 +13,7 @@ class Browser
     protected $panther;
     protected $withJavascript = false;
 
-    public function __construct(string $baseUri = '')
+    public function __construct(string $baseUri = null)
     {
         $this->baseUri = $baseUri;
     }
