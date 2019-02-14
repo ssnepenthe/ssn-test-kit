@@ -24,22 +24,24 @@ trait ManagesTerms
         return $this->addTermToPost($postId, 'post_tag', $tagId);
     }
 
-    protected function createTerm(string $taxonomy, string $title)
+    protected function createTerm(string $taxonomy, string $title, string $description = null)
     {
-        return $this->cli()->wpForOutput(sprintf(
-            'term create %s %s --porcelain',
-            escapeshellarg($taxonomy),
-            escapeshellarg($title)
-        ));
+        $command = sprintf('term create %s %s', escapeshellarg($taxonomy), escapeshellarg($title));
+
+        if ($description) {
+            $command .= sprintf(' --description=%s', escapeshellarg($description));
+        }
+
+        return $this->cli()->wpForOutput($command . ' --porcelain');
     }
 
-    protected function createCategory(string $title)
+    protected function createCategory(string $title, string $description = null)
     {
-        return $this->createTerm('category', $title);
+        return $this->createTerm('category', $title, $description);
     }
 
-    protected function createTag(string $title)
+    protected function createTag(string $title, string $description = null)
     {
-        return $this->createTerm('post_tag', $title);
+        return $this->createTerm('post_tag', $title, $description);
     }
 }
