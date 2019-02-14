@@ -5,6 +5,7 @@ namespace SsnTestKit;
 use Goutte\Client as GoutteClient;
 use GuzzleHttp\Client as GuzzleClient;
 use Symfony\Component\Panther\Client as PantherClient;
+use Symfony\Component\BrowserKit\Client as BrowserKitClient;
 
 class Browser
 {
@@ -59,6 +60,24 @@ class Browser
         }
 
         return $this->panther;
+    }
+
+    public function deleteAllCookies()
+    {
+        $this->foreachClient(function (BrowserKitClient $client) {
+            $client->getCookieJar()->clear();
+        });
+    }
+
+    public function forEachClient(\Closure $callback)
+    {
+        if (null !== $this->goutte) {
+            $callback($this->goutte);
+        }
+
+        if (null !== $this->panther) {
+            $callback($this->panther);
+        }
     }
 
     public function disableJavascript()
