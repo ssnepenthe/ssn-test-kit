@@ -5,56 +5,58 @@ namespace SsnTestKit;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ExceptionInterface;
 
-class Cli implements CommandRunner
+class Cli
 {
+    const MUST_RUN = true;
+
     protected $alias;
-    protected $debug;
-    protected $globalFlags = [];
-    protected $globalOptions = [];
     protected $wpBinPath;
 
-    // @todo Not certain what the API should look like long-term, let's keep it simple for now...
-    public function run(Command $command) : Command
+    public function process(string $command)
     {
-        // Should (hopefully) simplify testing.
-        if ($this->debug) {
-            $command->setStatus(Command::STATUS_DEBUG);
-            $command->setExitCode(0);
-            $command->setOutput('');
-        } else {
-            $process = Process::fromShellCommandline((string) $command);
-
-            $process->run();
-
-            $command->setStatus(Command::STATUS_COMPLETE);
-            $command->setExitCode($process->getExitCode());
-            $command->setOutput($process->getOutput());
-        }
-
-        return $command;
+        return Process::fromShellCommandline($command);
     }
 
-    public function wp()
+    public function run(string $command, bool $mustRun = false)
     {
-        $command = Command::make($this->getWpBinPath());
+        $process = $this->process($command);
 
+        if ($mustRun) {
+            $process->mustRun();
+        } else {
+            $process->run();
+        }
+
+        return $process;
+    }
+
+    public function wp(string $command, bool $mustRun = false)
+    {
+        return $this->run($this->buildWpCommand($command), $mustRun);
+    }
+
+    public function runForOutput(string $command)
+    {
+        return trim($this->run($command, self::MUST_RUN)->getOutput());
+    }
+
+    public function wpForOutput(string $command)
+    {
+        return trim($this->wp($command, self::MUST_RUN)->getOutput());
+    }
+
+    public function buildWpCommand(string $command)
+    {
         if (null !== $this->alias) {
-            // Maybe not appropriate to treat alias as subcommand, but it does the trick for now...
-            $command->addSubCommand($this->alias);
+            return sprintf(
+                '%s %s %s',
+                escapeshellarg($this->getWpBinPath()),
+                escapeshellarg($this->alias),
+                $command
+            );
         }
 
-        // Here instead of ->run() to ensure local options override global options.
-        foreach ($this->globalFlags as $flag => $_) {
-            $command->setFlag($flag);
-        }
-
-        foreach ($this->globalOptions as $key => $value) {
-            $command->setOption($key, $value);
-        }
-
-        $command->setRunner($this);
-
-        return $command;
+        return sprintf('%s %s', escapeshellarg($this->getWpBinPath()), $command);
     }
 
     public function getWpBinPath()
@@ -62,7 +64,7 @@ class Cli implements CommandRunner
         if (null === $this->wpBinPath) {
             try {
                 // Obviously not portable... May revisit at a later date.
-                $wp = trim((new Process(['which', 'wp']))->mustRun()->getOutput());
+                $wp = $this->runForOutput('which wp');
             } catch (ExceptionInterface $e) {
                 if ($this->debug) {
                     // @todo Just let it throw?
@@ -85,49 +87,6 @@ class Cli implements CommandRunner
         }
 
         $this->alias = $alias;
-
-        return $this;
-    }
-
-    public function setDebug(bool $debug)
-    {
-        $this->debug = $debug;
-
-        return $this;
-    }
-
-    public function setGlobalFlag(string $flag)
-    {
-        $this->globalFlags[$flag] = true;
-
-        return $this;
-    }
-
-    public function setGlobalFlags(array $flags)
-    {
-        $this->globalFlags = [];
-
-        foreach ($flags as $flag) {
-            $this->setGlobalFlag($flag);
-        }
-
-        return $this;
-    }
-
-    public function setGlobalOption(string $key, string $value)
-    {
-        $this->globalOptions[$key] = $value;
-
-        return $this;
-    }
-
-    public function setGlobalOptions(array $options)
-    {
-        $this->globalOptions = [];
-
-        foreach ($options as $key => $value) {
-            $this->setGlobalOption($key, $value);
-        }
 
         return $this;
     }

@@ -3,150 +3,99 @@
 namespace SsnTestKit\Tests;
 
 use SsnTestKit\Cli;
-use SsnTestKit\Command;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
+// @todo Not the most portable of tests...
 class CliTest extends TestCase
 {
-    protected function makeCli($wpBinPath = null)
-    {
-        $cli = (new Cli())->setDebug(true);
-
-        if ($wpBinPath) {
-            $cli->setWpBinPath($wpBinPath);
-        }
-
-        return $cli;
-    }
-
     /** @test */
     public function it_can_run_a_command()
     {
-        $command = Command::make('cmd');
+        $cli = new Cli();
+        $process = $cli->run('ls *.md');
+
+        $this->assertInstanceOf(Process::class, $process);
+        $this->assertStringContainsString('README.md', $process->getOutput());
+    }
+
+    /** @test */
+    public function it_can_enforce_that_a_command_must_run()
+    {
+        $this->expectException(ProcessFailedException::class);
+
+        $cli = new Cli();
+        $process = $cli->run('not-a-real-command', Cli::MUST_RUN);
+    }
+
+    /** @test */
+    public function it_can_run_a_wp_command()
+    {
+        $cli = new Cli();
+        $process = $cli->wp('help');
+
+        $this->assertStringContainsString('wp <command>', $process->getOutput());
+    }
+
+    /** @test */
+    public function it_can_run_a_command_for_output()
+    {
+        $cli = new Cli();
+        $output = $cli->runForOutput('ls *.md');
+
+        $this->assertStringContainsString('README.md', $output);
+    }
+
+    /** @test */
+    public function it_throws_if_there_is_an_error_when_running_for_output()
+    {
+        $this->expectException(ProcessFailedException::class);
+
+        $cli = new Cli();
+        $output = $cli->runForOutput('not-a-real-command');
+    }
+
+    /** @test */
+    public function it_can_run_a_wp_command_for_output()
+    {
+        $cli = new Cli();
+        $output = $cli->wpForOutput('help');
+
+        $this->assertStringContainsString('wp <command>', $output);
+    }
+
+    /** @test */
+    public function it_can_prepend_wp_to_a_command()
+    {
+        $cli = new Cli();
+
+        $this->assertEquals(
+            "'/Users/ryan/.composer/vendor/bin/wp' post create",
+            $cli->buildWpCommand('post create')
+        );
+
+        $cli->setWpBinPath('wp');
+
+        $this->assertEquals("'wp' post create", $cli->buildWpCommand('post create'));
+    }
+
+    /** @test */
+    public function it_can_insert_alias_into_wp_command_if_set()
+    {
+        $cli = new Cli();
 
         // Sanity.
-        $this->assertEquals(Command::STATUS_PENDING, $command->getStatus());
-        $this->assertNull($command->getExitCode());
-        $this->assertNull($command->getOutput());
-
-        // Command is returned directly.
-        $this->assertEquals("'cmd'", (string) $this->makeCli()->run($command));
-
-        // State is adjusted as expected.
-        $this->assertEquals(Command::STATUS_DEBUG, $command->getStatus());
-        $this->assertSame(0, $command->getExitCode());
-        $this->assertSame('', $command->getOutput());
-    }
-
-    /** @test */
-    public function it_can_create_a_base_wp_cli_command()
-    {
-        $cli = $this->makeCli('wp');
-
-        // Plain.
-        $this->assertEquals("'wp'", (string) $cli->wp());
-
-        // With alias.
-        $cli->setAlias('@one');
-        $this->assertEquals("'wp' '@one'", (string) $cli->wp());
-
-        // Runner is already set.
-        $this->assertInstanceOf(Command::class, $cli->wp()->run());
-    }
-
-    /** @test */
-    public function wp_command_instances_are_unique()
-    {
-        $cli = $this->makeCli();
-
-        $this->assertNotSame($cli->wp(), $cli->wp());
-    }
-
-    /** @test */
-    public function it_can_automatically_locate_wp_cli()
-    {
-        // Obviously not portable - will need to revisit if I want to get some sort of CI going...
         $this->assertEquals(
-            '/Users/ryan/.composer/vendor/bin/wp',
-            $this->makeCli()->getWpBinPath()
+            "'/Users/ryan/.composer/vendor/bin/wp' post create",
+            $cli->buildWpCommand('post create')
         );
-    }
 
-    /** @test */
-    public function alias_can_be_set()
-    {
-        $cli = $this->makeCli('wp');
+        $cli->setAlias('vvv');
 
-        $cli->setAlias('@one');
-
-        $this->assertEquals("'wp' '@one'", (string) $cli->wp());
-
-        // '@' is added automatically.
-        $cli->setAlias('two');
-
-        $this->assertEquals("'wp' '@two'", (string) $cli->wp());
-    }
-
-    /** @test */
-    public function global_flags_can_be_set()
-    {
-        $cli = $this->makeCli('wp');
-        $cli->setGlobalFlag('one');
-        $cli->setGlobalFlag('two');
-
-        $cmd = $cli->wp();
-
-        $this->assertEquals("'wp' '--one' '--two'", $cli->run($cmd));
-
-        $cli = $this->makeCli('wp');
-        $cli->setGlobalFlags(['three', 'four']);
-
-        $cmd = $cli->wp();
-
-        $this->assertEquals("'wp' '--three' '--four'", $cli->run($cmd));
-    }
-
-    /** @test */
-    public function global_options_can_be_set()
-    {
-        $cli = $this->makeCli('wp');
-        $cli->setGlobalOption('a', 'b');
-        $cli->setGlobalOption('c', 'd');
-
-        $cmd = $cli->wp();
-
-        $this->assertEquals("'wp' '--a'='b' '--c'='d'", $cli->run($cmd));
-
-        $cli = $this->makeCli('wp');
-        $cli->setGlobalOptions([
-            'e' => 'f',
-            'g' => 'h'
-        ]);
-
-        $cmd = $cli->wp();
-
-        $this->assertEquals("'wp' '--e'='f' '--g'='h'", $cli->run($cmd));
-    }
-
-    /** @test */
-    public function command_options_take_precedence_over_global_options()
-    {
-        // @todo This is backwards...
-        $cli = $this->makeCli('wp');
-        $cli->setGlobalOption('a', 'b');
-
-        $cmd = $cli->wp();
-        $cmd->setOption('a', 'c');
-
-        $this->assertEquals("'wp' '--a'='c'", $cli->run($cmd));
-    }
-
-    /** @test */
-    public function bin_path_can_be_set()
-    {
-        $cli = $this->makeCli();
-        $cli->setWpBinPath('/just/another/path/string');
-
-        $this->assertEquals('/just/another/path/string', $cli->getWpBinPath());
+        $this->assertEquals(
+            "'/Users/ryan/.composer/vendor/bin/wp' '@vvv' post create",
+            $cli->buildWpCommand('post create')
+        );
     }
 }
