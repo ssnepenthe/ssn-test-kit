@@ -64,7 +64,7 @@ class Browser
 
     public function deleteAllCookies()
     {
-        $this->foreachClient(function (BrowserKitClient $client) {
+        $this->forEachClient(function (BrowserKitClient $client) {
             $client->getCookieJar()->clear();
         });
     }
