@@ -13,4 +13,20 @@ trait ManagesPosts
             escapeshellarg($status)
         ));
     }
+
+    // count, post_type, post_status, post_Title, post_author, post_date, post_date_gmt, post_content, max_depth, format
+    protected function generatePosts(int $count = 1, array $args = [])
+    {
+        // @todo $args ignored for now, but this is where you would set post_type, post_status, etc.
+        $postIds = $this->cli()->wpForOutput(sprintf(
+            'post generate --count=%s --format=ids',
+            escapeshellarg($count)
+        ));
+
+        if (1 === $count) {
+            return (int) $postIds;
+        }
+
+        return array_map('intval', explode(' ', $postIds));
+    }
 }
