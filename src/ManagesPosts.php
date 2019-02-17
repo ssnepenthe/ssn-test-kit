@@ -23,10 +23,6 @@ trait ManagesPosts
             escapeshellarg($count)
         ));
 
-        if (1 === $count) {
-            return (int) $postIds;
-        }
-
         return array_map('intval', explode(' ', $postIds));
     }
 }

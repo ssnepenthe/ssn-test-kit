@@ -56,10 +56,6 @@ trait ManagesTerms
             escapeshellarg($maxDepth)
         ));
 
-        if (1 === $count) {
-            return (int) $termIds;
-        }
-
         return array_map('intval', explode(' ', $termIds));
     }
 
