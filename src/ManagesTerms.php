@@ -4,24 +4,24 @@ namespace SsnTestKit;
 
 trait ManagesTerms
 {
-    protected function addTermToPost(int $postId, string $taxonomy, int $termId)
+    protected function addTermsToPost(int $postId, string $taxonomy, int ...$termIds)
     {
         return $this->cli()->wpForOutput(sprintf(
             'post term add %s %s %s --by=id',
             escapeshellarg($postId),
             escapeshellarg($taxonomy),
-            escapeshellarg($termId)
+            implode(' ', array_map('escapeshellarg', $termIds))
         ));
     }
 
-    protected function addCategoryToPost(int $postId, int $categoryId)
+    protected function addCategoriesToPost(int $postId, int ...$categoryIds)
     {
-        return $this->addTermToPost($postId, 'category', $categoryId);
+        return $this->addTermsToPost($postId, 'category', ...$categoryIds);
     }
 
-    protected function addTagToPost(int $postId, int $tagId)
+    protected function addTagsToPost(int $postId, int ...$tagIds)
     {
-        return $this->addTermToPost($postId, 'post_tag', $tagId);
+        return $this->addTermsToPost($postId, 'post_tag', ...$tagIds);
     }
 
     protected function createTerm(string $taxonomy, string $title, string $description = null)
