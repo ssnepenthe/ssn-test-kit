@@ -72,4 +72,24 @@ trait ManagesTerms
     {
         return $this->generateTerms('post_tag', $count, $maxDepth);
     }
+
+    protected function setPostTerms(int $postId, string $taxonomy, int ...$termIds)
+    {
+        return $this->cli()->wpForOutput(sprintf(
+            'post term set %s %s %s --by=id',
+            escapeshellarg($postId),
+            escapeshellarg($taxonomy),
+            implode(' ', array_map('escapeshellarg', $termIds))
+        ));
+    }
+
+    protected function setPostCategories(int $postId, int ...$categoryIds)
+    {
+        return $this->setPostTerms($postId, 'category', ...$categoryIds);
+    }
+
+    protected function setPostTags(int $postId, int ...$tagIds)
+    {
+        return $this->setPostTerms($postId, 'post_tag', ...$tagIds);
+    }
 }
