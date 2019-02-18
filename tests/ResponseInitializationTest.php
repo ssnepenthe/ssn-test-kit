@@ -18,12 +18,37 @@ class ResponseInitializationTest extends TestCase
     /** @test */
     public function it_provides_access_to_the_raw_response_content()
     {
-        $empty = $this->makeResponse();
-        $full = $this->makeResponse('Test Content');
+        $document = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    Hi there
+</body>
+</html>
+HTML;
 
-        // @todo Check on panther... I think this is initial page content so probably before JS execution...
+        $content = <<<HTML
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    Hi there
+</body>
+
+HTML;
+
+        $empty = $this->makeResponse();
+        $full = $this->makeResponse($document);
+
+        // @todo Perform a live test for this... Need to check differences between Goutte and Panther.
         $this->assertEquals('', $empty->content());
-        $this->assertEquals('Test Content', $full->content());
+        $this->assertEquals($content, $full->content());
     }
 
     /** @test */
@@ -171,6 +196,33 @@ class ResponseInitializationTest extends TestCase
 
         $this->assertInstanceOf(BrowserKitResponse::class, $response->unwrap());
         $this->assertSame($bk, $response->unwrap());
+    }
+
+    /** @test */
+    public function it_provides_a_shorthand_for_filtering_crawler_before_acting()
+    {
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <p>First</p>
+    <p>Second</p>
+</body>
+</html>
+HTML;
+
+        $response = $this->makeResponse($html);
+
+        $this->assertStringContainsString('First', $response->crawler()->text());
+        $this->assertStringContainsString('Second', $response->crawler()->text());
+
+        $response->within('p:first-child', function ($response) {
+            $this->assertEquals('First', $response->crawler()->text());
+        });
     }
 
     /** @test */

@@ -30,22 +30,6 @@ class Response
         } catch (\InvalidArgumentException $e) {
             return '';
         }
-
-        if ($this->isPanther()) {
-            /**
-             * Response object may have been created before JavaScript execution has completed so
-             * we get the page source from webdriver.
-             *
-             * An alternative option might be $this->crawler()->html().
-             *
-             * @psalm-suppress UndefinedMethod
-             *
-             * @todo Get some automated tests set up for this.
-             */
-            return $this->client->getWebDriver()->getPageSource();
-        }
-
-        return $this->unwrap()->getContent();
     }
 
     /**
@@ -99,6 +83,34 @@ class Response
     public function unwrap() : \Symfony\Component\BrowserKit\Response
     {
         return $this->client->getInternalResponse();
+    }
+
+    /**
+     * @return self
+     */
+    public function within(string $selector, \Closure $callback)
+    {
+        $callback(new class($this->client(), $selector) extends Response {
+            /**
+             * @var string
+             */
+            protected $selector;
+
+            public function __construct(Client $client, string $selector)
+            {
+                parent::__construct($client);
+
+                $this->selector = $selector;
+            }
+
+            public function crawler() : \Symfony\Component\DomCrawler\Crawler
+            {
+                // @todo Cache filtered crawler?
+                return parent::crawler()->filter($this->selector);
+            }
+        });
+
+        return $this;
     }
 
     public function isPanther() : bool

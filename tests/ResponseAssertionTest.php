@@ -432,4 +432,29 @@ class ResponseAssertionTest extends TestCase
 
         $response->assertDontSeeText('Lions and tigers');
     }
+
+    /** @test */
+    public function it_can_make_assertions_against_a_filtered_crawler()
+    {
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <p>First</p>
+    <p>Second</p>
+</body>
+</html>
+HTML;
+
+        $this->makeResponse($html)
+            ->within('p:first-child', function ($response) {
+                $response
+                    ->assertSee('First')
+                    ->assertDontSee('Second');
+            });
+    }
 }

@@ -44,7 +44,7 @@ trait MakesResponses
 
         $client->method('getCookieJar')->willReturn($cookieJar);
 
-        $client->method('getCrawler')->willReturn($crawler ?? new Crawler());
+        $client->method('getCrawler')->willReturn($crawler ?? new Crawler($args['content'] ?? ''));
 
         return new Response($client);
     }
