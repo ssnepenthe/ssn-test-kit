@@ -4,9 +4,17 @@ namespace SsnTestKit;
 
 trait MakesHttpRequests
 {
+    /**
+     * @var Browser|null
+     */
     protected static $browser;
 
-    public function browser()
+    /**
+     * @return Browser
+     *
+     * @psalm-suppress InvalidNullableReturnType
+     */
+    public function browser() : Browser
     {
         if (null === static::$browser) {
             $baseUri = null;
@@ -14,6 +22,9 @@ trait MakesHttpRequests
             if (method_exists($this, 'browserBaseUri')) {
                 $baseUri = $this->browserBaseUri();
             } elseif (property_exists($this, 'browserBaseUri')) {
+                /**
+                 * @psalm-suppress UndefinedThisPropertyFetch
+                 */
                 $baseUri = $this->browserBaseUri;
             }
 

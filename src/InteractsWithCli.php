@@ -4,9 +4,17 @@ namespace SsnTestKit;
 
 trait InteractsWithCli
 {
+    /**
+     * @var Cli|null
+     */
     protected static $cli;
 
-    public function cli()
+    /**
+     * @return Cli
+     *
+     * @psalm-suppress InvalidNullableReturnType
+     */
+    public function cli() : Cli
     {
         if (null === static::$cli) {
             static::$cli = new Cli();
@@ -14,6 +22,9 @@ trait InteractsWithCli
             if (method_exists($this, 'wpCliBinPath')) {
                 static::$cli->setWpBinPath($this->wpCliBinPath());
             } elseif (property_exists($this, 'wpCliBinPath')) {
+                /**
+                 * @psalm-suppress UndefinedThisPropertyFetch
+                 */
                 static::$cli->setWpBinPath($this->wpCliBinPath);
             }
 

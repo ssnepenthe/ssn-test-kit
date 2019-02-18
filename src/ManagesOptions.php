@@ -13,7 +13,7 @@ trait ManagesOptions
         );
     }
 
-    protected function setOption(string $key, $value)
+    protected function setOption(string $key, $value) : string
     {
         return $this->cli()->wpForOutput(sprintf(
             'option set %s %s --format=json',

@@ -4,7 +4,7 @@ namespace SsnTestKit;
 
 trait ManagesUserSessions
 {
-    protected function login()
+    protected function login() : void
     {
         // @todo Allow subclasses to configure credentials.
         $this->browser()->post('/wp-login.php', [
@@ -13,7 +13,7 @@ trait ManagesUserSessions
         ]);
     }
 
-    protected function logout()
+    protected function logout() : void
     {
         // @todo Would it be better to specifically target WP cookies? Probably...
         $this->browser()->deleteAllCookies();

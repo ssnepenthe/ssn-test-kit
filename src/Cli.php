@@ -9,17 +9,19 @@ class Cli
 {
     const MUST_RUN = true;
 
+    /**
+     * @var string|null
+     */
     protected $alias;
+
+    /**
+     * @var string|null
+     */
     protected $wpBinPath;
 
-    public function process(string $command)
+    public function run(string $command, bool $mustRun = false) : Process
     {
-        return Process::fromShellCommandline($command);
-    }
-
-    public function run(string $command, bool $mustRun = false)
-    {
-        $process = $this->process($command);
+        $process = Process::fromShellCommandline($command);
 
         if ($mustRun) {
             $process->mustRun();
@@ -30,22 +32,22 @@ class Cli
         return $process;
     }
 
-    public function wp(string $command, bool $mustRun = false)
+    public function wp(string $command, bool $mustRun = false) : Process
     {
         return $this->run($this->buildWpCommand($command), $mustRun);
     }
 
-    public function runForOutput(string $command)
+    public function runForOutput(string $command) : string
     {
         return trim($this->run($command, self::MUST_RUN)->getOutput());
     }
 
-    public function wpForOutput(string $command)
+    public function wpForOutput(string $command) : string
     {
         return trim($this->wp($command, self::MUST_RUN)->getOutput());
     }
 
-    public function buildWpCommand(string $command)
+    public function buildWpCommand(string $command) : string
     {
         if (null !== $this->alias) {
             return sprintf(
@@ -59,19 +61,15 @@ class Cli
         return sprintf('%s %s', escapeshellarg($this->getWpBinPath()), $command);
     }
 
-    public function getWpBinPath()
+    public function getWpBinPath() : string
     {
         if (null === $this->wpBinPath) {
             try {
                 // Obviously not portable... May revisit at a later date.
                 $wp = $this->runForOutput('which wp');
             } catch (ExceptionInterface $e) {
-                if ($this->debug) {
-                    // @todo Just let it throw?
-                    $wp = 'wp';
-                } else {
-                    throw $e;
-                }
+                // @todo Just let it throw?
+                $wp = 'wp';
             }
 
             $this->wpBinPath = $wp;
@@ -80,6 +78,9 @@ class Cli
         return $this->wpBinPath;
     }
 
+    /**
+     * @return self
+     */
     public function setAlias(string $alias)
     {
         if ('@' !== $alias[0]) {
@@ -91,6 +92,9 @@ class Cli
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function setWpBinPath(string $path)
     {
         $this->wpBinPath = $path;

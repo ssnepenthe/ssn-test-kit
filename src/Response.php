@@ -8,6 +8,9 @@ use Symfony\Component\Panther\DomCrawler\Crawler;
 
 class Response
 {
+    /**
+     * @var Client
+     */
     protected $client;
 
     public function __construct(Client $client)
@@ -15,46 +18,62 @@ class Response
         $this->client = $client;
     }
 
-    public function client()
+    public function client() : Client
     {
         return $this->client;
     }
 
-    public function content()
+    public function content() : string
     {
+        try {
+            return $this->crawler()->html();
+        } catch (\InvalidArgumentException $e) {
+            return '';
+        }
+
         if ($this->isPanther()) {
-            // We can't rely on $this->unwrap()->getContent() when using panther - The response may
-            // have been built before JavaScript execution has completed.
-            //
-            // Here we access the web driver instance directly for the page source.
-            //
-            // Not sure if this is preferable or we should try something like
-            // $this->crawler()->html().
-            //
-            // @todo Get some automated tests set up for this.
+            /**
+             * Response object may have been created before JavaScript execution has completed so
+             * we get the page source from webdriver.
+             *
+             * An alternative option might be $this->crawler()->html().
+             *
+             * @psalm-suppress UndefinedMethod
+             *
+             * @todo Get some automated tests set up for this.
+             */
             return $this->client->getWebDriver()->getPageSource();
         }
 
         return $this->unwrap()->getContent();
     }
 
-    public function cookie($name, $path = '/', $domain = null)
+    /**
+     * @return \Symfony\Component\BrowserKit\Cookie|null
+     */
+    public function cookie(string $name, string $path = '/', string $domain = null)
     {
         return $this->client->getCookieJar()->get($name, $path, $domain);
     }
 
-    public function cookies()
+    /**
+     * @return \Symfony\Component\BrowserKit\Cookie[]
+     */
+    public function cookies() : array
     {
         return $this->client->getCookieJar()->all();
     }
 
-    public function status()
+    public function status() : int
     {
         $this->throwForPanther('status');
 
         return $this->unwrap()->getStatus();
     }
 
+    /**
+     * @return string|string[]|null
+     */
     public function header(string $header, bool $first = true)
     {
         $this->throwForPanther('headers');
@@ -62,31 +81,34 @@ class Response
         return $this->unwrap()->getHeader($header, $first);
     }
 
-    public function headers()
+    /**
+     * @return array<string, string>
+     */
+    public function headers() : array
     {
         $this->throwForPanther('headers');
 
         return $this->unwrap()->getHeaders();
     }
 
-    public function crawler()
+    public function crawler() : \Symfony\Component\DomCrawler\Crawler
     {
         return $this->client->getCrawler();
     }
 
-    public function unwrap()
+    public function unwrap() : \Symfony\Component\BrowserKit\Response
     {
         return $this->client->getInternalResponse();
     }
 
-    public function isPanther()
+    public function isPanther() : bool
     {
         // Maybe not ideal - by testing $this->crawler() instead of $this->client I am able to avoid
         // situations where I would otherwise be trying to mock a (final) panther client object.
         return $this->crawler() instanceof Crawler;
     }
 
-    protected function throwForPanther(string $property)
+    protected function throwForPanther(string $property) : void
     {
         if ($this->isPanther()) {
             // @todo Better to throw SkippedTestError for PHPUnit's sake? Or something specific to
@@ -97,6 +119,9 @@ class Response
         }
     }
 
+    /**
+     * @return self
+     */
     public function waitFor(
         string $cssSelector,
         int $timeoutInSeconds = 30,
@@ -108,58 +133,64 @@ class Response
             );
         }
 
+        /**
+         * @psalm-suppress UndefinedMethod
+         */
         $this->client->waitFor($cssSelector, $timeoutInSeconds, $intervalInMilliseconds);
 
         return $this;
     }
 
-    public function isInformational()
+    public function isInformational() : bool
     {
         return $this->status() >= 100 && $this->status() < 200;
     }
 
-    public function isSuccessful()
+    public function isSuccessful() : bool
     {
         return $this->status() >= 200 && $this->status() < 300;
     }
 
-    public function isRedirection()
+    public function isRedirection() : bool
     {
         return $this->status() >= 300 && $this->status() < 400;
     }
 
-    public function isClientError()
+    public function isClientError() : bool
     {
         return $this->status() >= 400 && $this->status() < 500;
     }
 
-    public function isServerError()
+    public function isServerError() : bool
     {
         return $this->status() >= 500 && $this->status() < 600;
     }
 
-    public function isOk()
+    public function isOk() : bool
     {
         return 200 === $this->status();
     }
 
-    public function isForbidden()
+    public function isForbidden() : bool
     {
         return 403 === $this->status();
     }
 
-    public function isNotFound()
+    public function isNotFound() : bool
     {
         return 404 === $this->status();
     }
 
-    public function isRedirect(string $location = null)
+    public function isRedirect(string $location = null) : bool
     {
         return \in_array($this->status(), [ 201, 301, 302, 303, 307, 308 ], true) && (
             null === $location ?: $location === $this->header('Location')
         );
     }
 
+    /**
+     * @return self
+     */
     public function assertInformational()
     {
         Assert::assertTrue(
@@ -170,6 +201,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertSuccessful()
     {
         Assert::assertTrue(
@@ -180,6 +214,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertRedirection()
     {
         Assert::assertTrue(
@@ -190,6 +227,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertClientError()
     {
         Assert::assertTrue(
@@ -200,6 +240,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertServerError()
     {
         Assert::assertTrue(
@@ -210,6 +253,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertStatus(int $status)
     {
         Assert::assertTrue(
@@ -220,21 +266,33 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertOk()
     {
         return $this->assertStatus(200);
     }
 
+    /**
+     * @return self
+     */
     public function assertForbidden()
     {
         return $this->assertStatus(403);
     }
 
+    /**
+     * @return self
+     */
     public function assertNotFound()
     {
         return $this->assertStatus(404);
     }
 
+    /**
+     * @return self
+     */
     public function assertRedirect(string $uri = null)
     {
         Assert::assertTrue(
@@ -243,15 +301,19 @@ class Response
         );
 
         if (null !== $uri) {
-            // Move to ->assertLocation()?
+            // Move to ->assertLocation()? Can we get access to browser base_uri setting to support relative URLs?
             Assert::assertEquals($uri, $this->header('Location'));
         }
 
         return $this;
     }
 
-    public function assertHeader(string $name, $value = null)
+    /**
+     * @return self
+     */
+    public function assertHeader(string $name, string $value = null)
     {
+        // @todo Handle headers with multiple values. ($this->header($name, false))
         $header = $this->header($name);
 
         Assert::assertTrue(
@@ -270,6 +332,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertHeaderMissing(string $name)
     {
         $header = $this->header($name);
@@ -282,13 +347,19 @@ class Response
         return $this;
     }
 
-    public function assertCookie(string $name, $value = null)
+    /**
+     * @return self
+     */
+    public function assertCookie(string $name, string $value = null)
     {
         $cookie = $this->cookie($name);
 
         Assert::assertNotNull($cookie, "Cookie {$name} not present on response");
 
         if (null !== $value) {
+            /**
+             * @psalm-suppress PossiblyNullReference
+             */
             $actual = $cookie->getValue();
 
             Assert::assertEquals(
@@ -301,6 +372,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertCookieMissing(string $name)
     {
         Assert::assertNull($this->cookie($name), "Unexpected cookie {$name} present on response");
@@ -308,6 +382,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertSee(string $value)
     {
         Assert::assertStringContainsString($value, $this->content());
@@ -315,6 +392,10 @@ class Response
         return $this;
     }
 
+    /**
+     * @param string[] $values
+     * @return self
+     */
     public function assertSeeInOrder(array $values)
     {
         Assert::assertThat($values, new SeeInOrder($this->content()));
@@ -322,6 +403,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertSeeText(string $value)
     {
         Assert::assertStringContainsString($value, strip_tags($this->content()));
@@ -329,6 +413,10 @@ class Response
         return $this;
     }
 
+    /**
+     * @param string[] $values
+     * @return self
+     */
     public function assertSeeTextInOrder(array $values)
     {
         Assert::assertThat($values, new SeeInOrder(strip_tags($this->content())));
@@ -336,6 +424,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertDontSee(string $value)
     {
         Assert::assertStringNotContainsString($value, $this->content());
@@ -343,6 +434,9 @@ class Response
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function assertDontSeeText(string $value)
     {
         Assert::assertStringNotContainsString($value, strip_tags($this->content()));

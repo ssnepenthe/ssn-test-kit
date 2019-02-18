@@ -9,9 +9,24 @@ use Symfony\Component\BrowserKit\Client as BrowserKitClient;
 
 class Browser
 {
+    /**
+     * @var string|null
+     */
     protected $baseUri;
+
+    /**
+     * @var GoutteClient|null
+     */
     protected $goutte;
+
+    /**
+     * @var PantherClient|null
+     */
     protected $panther;
+
+    /**
+     * @var boolean
+     */
     protected $withJavascript = false;
 
     public function __construct(string $baseUri = null)
@@ -19,8 +34,10 @@ class Browser
         $this->baseUri = $baseUri;
     }
 
-    // @todo Panther already quits on __destruct...
-    public function quit()
+    /**
+     * @todo Panther already quits on __destruct...
+     */
+    public function quit() : void
     {
         if (null !== $this->panther) {
             $this->panther->quit();
@@ -30,12 +47,12 @@ class Browser
         $this->panther = null;
     }
 
-    public function client()
+    public function client() : BrowserKitClient
     {
         return $this->withJavascript ? $this->panther() : $this->goutte();
     }
 
-    public function goutte()
+    public function goutte() : GoutteClient
     {
         if (null === $this->goutte) {
             $this->goutte = new GoutteClient();
@@ -53,7 +70,7 @@ class Browser
         return $this->goutte;
     }
 
-    public function panther()
+    public function panther() : PantherClient
     {
         if (! $this->panther) {
             $this->panther = PantherClient::createChromeClient(null, null, [], $this->baseUri);
@@ -62,13 +79,19 @@ class Browser
         return $this->panther;
     }
 
+    /**
+     * @return self
+     */
     public function deleteAllCookies()
     {
-        $this->forEachClient(function (BrowserKitClient $client) {
+        return $this->forEachClient(function (BrowserKitClient $client) : void {
             $client->getCookieJar()->clear();
         });
     }
 
+    /**
+     * @return self
+     */
     public function forEachClient(\Closure $callback)
     {
         if (null !== $this->goutte) {
@@ -78,8 +101,13 @@ class Browser
         if (null !== $this->panther) {
             $callback($this->panther);
         }
+
+        return $this;
     }
 
+    /**
+     * @return self
+     */
     public function disableJavascript()
     {
         $this->withJavascript = false;
@@ -87,6 +115,9 @@ class Browser
         return $this;
     }
 
+    /**
+     * @return self
+     */
     public function enableJavascript()
     {
         $this->withJavascript = true;
@@ -94,12 +125,16 @@ class Browser
         return $this;
     }
 
-    public function isJavascriptEnabled()
+    public function isJavascriptEnabled() : bool
     {
         return $this->withJavascript;
     }
 
-    // Provides a method of avoiding having to disable JavaScript after each test...
+    /**
+     * Provides a method of avoiding having to disable JavaScript after each test...
+     *
+     * @return self
+     */
     public function withJavascript(\Closure $callback)
     {
         $this->enableJavascript();
@@ -111,7 +146,9 @@ class Browser
         return $this;
     }
 
-    // @todo Consider simplifying method signatures a bit?
+    /**
+     * @todo Consider simplifying method signatures a bit?
+     */
     public function request(
         string $method,
         string $uri,
@@ -120,7 +157,7 @@ class Browser
         array $server = [],
         string $content = null,
         bool $change_history = true
-    ) {
+    ) : Response {
         $this->client()->request(
             $method,
             $uri,
@@ -153,7 +190,7 @@ class Browser
         array $server = [],
         string $content = null,
         bool $change_history = true
-    ) {
+    ) : Response {
         return $this->request(
             'GET',
             $uri,
@@ -166,13 +203,13 @@ class Browser
     }
 
     public function post(
-        $uri,
+        string $uri,
         array $parameters = [],
         array $files = [],
         array $server = [],
         string $content = null,
         bool $change_history = true
-    ) {
+    ) : Response {
         // Will throw on Panther...
         return $this->request(
             'POST',
