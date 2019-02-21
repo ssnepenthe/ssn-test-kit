@@ -484,4 +484,17 @@ class Response
 
         return $this;
     }
+
+    /**
+     * @return self
+     */
+    public function assertNodeCount(int $count, string $selector = null)
+    {
+        Assert::assertCount(
+            $count,
+            null === $selector ? $this->crawler() : $this->crawler()->filter($selector)
+        );
+
+        return $this;
+    }
 }

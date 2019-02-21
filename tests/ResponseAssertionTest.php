@@ -510,6 +510,37 @@ class ResponseAssertionTest extends TestCase
     }
 
     /** @test */
+    public function it_can_assert_crawler_node_count()
+    {
+        $crawler = new Crawler('<div><p>One</p><p>Two</p></div>');
+
+        // Empty.
+        $this->makeResponse()->assertNodeCount(0);
+
+        // Single node.
+        $this->makeResponse([], null, null, $crawler->filter('div'))->assertNodeCount(1);
+
+        // Multiple nodes.
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCount(2);
+
+        // Single node filtered via assertion method.
+        $response = $this->makeResponse([], null, null, $crawler->filter('div'));
+
+        $response->assertNodeCount(1);
+        $response->assertNodeCount(2, 'p');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_crawler_node_count()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<p>One</p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCount(2);
+    }
+
+    /** @test */
     public function it_can_make_assertions_against_a_filtered_crawler()
     {
         $html = <<<HTML
