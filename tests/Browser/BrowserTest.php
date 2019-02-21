@@ -47,4 +47,42 @@ class BrowserTest extends TestCase
         // JavaScript is still disabled out here :).
         $this->assertFalse($browser->isJavascriptEnabled());
     }
+
+    /** @test */
+    public function it_provides_a_method_for_performing_an_action_on_all_active_clients()
+    {
+        $browser = new Browser();
+
+        $goutteCount = 0;
+        $pantherCount = 0;
+
+        $clientCounter = function ($client) use (&$goutteCount, &$pantherCount) {
+            if ($client instanceof \Goutte\Client) {
+                $goutteCount++;
+            }
+
+            if ($client instanceof \Symfony\Component\Panther\Client) {
+                $pantherCount++;
+            }
+        };
+
+        $browser->forEachClient($clientCounter);
+
+        $this->assertSame(0, $goutteCount);
+        $this->assertSame(0, $pantherCount);
+
+        $browser->goutte();
+
+        $browser->forEachClient($clientCounter);
+
+        $this->assertSame(1, $goutteCount);
+        $this->assertSame(0, $pantherCount);
+
+        $browser->panther();
+
+        $browser->forEachClient($clientCounter);
+
+        $this->assertSame(2, $goutteCount);
+        $this->assertSame(1, $pantherCount);
+    }
 }
