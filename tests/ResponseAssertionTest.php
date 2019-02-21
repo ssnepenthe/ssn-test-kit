@@ -4,6 +4,7 @@ namespace SsnTestKit\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\DomCrawler\Crawler;
 use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Component\BrowserKit\CookieJar;
 
@@ -431,6 +432,81 @@ class ResponseAssertionTest extends TestCase
         );
 
         $response->assertDontSeeText('Lions and tigers');
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_node_is_checked()
+    {
+        $crawler = new Crawler('<p><input checked type="checkbox"><p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('input'))->assertChecked();
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))
+            ->assertChecked('[type="checkbox"]');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_that_a_root_node_is_checked()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<p><input checked type="checkbox"></p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertChecked();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_that_a_root_node_is_checked_2()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<input type="checkbox">');
+
+        $this->makeResponse([], null, null, $crawler->filter('input'))->assertChecked();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_that_a_node_is_checked()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<p><input type="checkbox"></p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))
+            ->assertChecked('[type="checkbox"]');
+    }
+
+    /** @test */
+    public function it_can_assert_that_a_node_is_not_checked()
+    {
+        $crawler = new Crawler('<p><input type="checkbox"><p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('input'))
+            ->assertNotChecked();
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))
+            ->assertNotChecked('[type="checkbox"]');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_that_a_root_node_is_not_checked()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<input checked type="checkbox">');
+
+        $this->makeResponse([], null, null, $crawler->filter('input'))->assertNotChecked();
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_that_a_node_is_not_checked()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<p><input checked type="checkbox"></p>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))
+            ->assertNotChecked('[type="checkbox"]');
     }
 
     /** @test */

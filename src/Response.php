@@ -4,6 +4,7 @@ namespace SsnTestKit;
 
 use PHPUnit\Framework\Assert;
 use Symfony\Component\BrowserKit\Client;
+use PHPUnit\Framework\Constraint\LogicalNot;
 use Symfony\Component\Panther\DomCrawler\Crawler;
 
 class Response
@@ -452,6 +453,34 @@ class Response
     public function assertDontSeeText(string $value)
     {
         Assert::assertStringNotContainsString($value, strip_tags($this->content()));
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function assertChecked(string $selector = null)
+    {
+        $element = null === $selector
+            ? $this->crawler()->getNode(0)
+            : $this->crawler()->filter($selector)->getNode(0);
+
+        Assert::assertThat($element, new ElementHasAttribute('checked'));
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function assertNotChecked(string $selector = null)
+    {
+        $element = null === $selector
+            ? $this->crawler()->getNode(0)
+            : $this->crawler()->filter($selector)->getNode(0);
+
+        Assert::assertThat($element, new LogicalNot(new ElementHasAttribute('checked')));
 
         return $this;
     }
