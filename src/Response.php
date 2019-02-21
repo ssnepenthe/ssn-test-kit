@@ -525,4 +525,24 @@ class Response
 
         return $this;
     }
+
+    /**
+     * @return self
+     */
+    public function assertPresent(string $selector)
+    {
+        Assert::assertGreaterThan(0, $this->crawler()->filter($selector)->count());
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function assertAbsent(string $selector)
+    {
+        Assert::assertCount(0, $this->crawler()->filter($selector));
+
+        return $this;
+    }
 }

@@ -609,6 +609,42 @@ class ResponseAssertionTest extends TestCase
     }
 
     /** @test */
+    public function it_can_assert_node_presence_by_selector()
+    {
+        $crawler = new Crawler('<div><p class="one">One<p><p class="two">Two</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertPresent('.one');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_node_presence_by_selector()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p class="one">One<p><p class="two">Two</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertPresent('.three');
+    }
+
+    /** @test */
+    public function it_can_assert_node_absence_by_selector()
+    {
+        $crawler = new Crawler('<div><p class="one">One<p><p class="two">Two</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertAbsent('.three');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_node_absence_by_selector()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p class="one">One<p><p class="two">Two</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertAbsent('.one');
+    }
+
+    /** @test */
     public function it_can_make_assertions_against_a_filtered_crawler()
     {
         $html = <<<HTML
