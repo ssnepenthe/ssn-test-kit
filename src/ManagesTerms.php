@@ -26,7 +26,7 @@ trait ManagesTerms
     }
 
     // @todo Any reason to accept format? Probably not...
-    protected function generateTerms(string $taxonomy, int $count = 1, int $maxDepth = 1) : string
+    protected function generateTerms(string $taxonomy, int $count = 1, int $maxDepth = 1) : array
     {
         // @todo Consider accepting args array for misc options?
         $termIds = $this->cli()->wpForOutput(sprintf(
@@ -39,12 +39,12 @@ trait ManagesTerms
         return array_map('intval', explode(' ', $termIds));
     }
 
-    protected function generateCategories(int $count = 1, int $maxDepth = 1) : string
+    protected function generateCategories(int $count = 1, int $maxDepth = 1) : array
     {
         return $this->generateTerms('category', $count, $maxDepth);
     }
 
-    protected function generateTags(int $count = 1, int $maxDepth = 1) : string
+    protected function generateTags(int $count = 1, int $maxDepth = 1) : array
     {
         return $this->generateTerms('post_tag', $count, $maxDepth);
     }
