@@ -497,4 +497,32 @@ class Response
 
         return $this;
     }
+
+    /**
+     * @return self
+     */
+    public function assertNodeCountGreaterThan(int $count, string $selector = null)
+    {
+        $actual = null === $selector
+            ? $this->crawler()->count()
+            : $this->crawler()->filter($selector)->count();
+
+        Assert::assertGreaterThan($count, $actual);
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function assertNodeCountLessThan(int $count, string $selector = null)
+    {
+        $actual = null === $selector
+            ? $this->crawler()->count()
+            : $this->crawler()->filter($selector)->count();
+
+        Assert::assertLessThan($count, $actual);
+
+        return $this;
+    }
 }

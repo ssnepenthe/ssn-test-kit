@@ -541,6 +541,74 @@ class ResponseAssertionTest extends TestCase
     }
 
     /** @test */
+    public function it_can_fail_to_assert_crawler_node_count_no_selector()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<p>One</p>');
+
+        $this->makeResponse([], null, null, $crawler)->assertNodeCount(2, 'p');
+    }
+
+    /** @test */
+    public function it_can_assert_crawler_node_count_is_greater_than_number()
+    {
+        $crawler = new Crawler('<div><p>One</p><p>Two</p><p>Three</p></div>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCountGreaterThan(2);
+        $this->makeResponse([], null, null, $crawler)->assertNodeCountGreaterThan(2, 'p');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_crawler_node_count_is_greater_than_number()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p>One</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertNodeCountGreaterThan(1, 'p');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_crawler_node_count_is_greater_than_number_no_selector()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p>One</p></div>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCountGreaterThan(1);
+    }
+
+    /** @test */
+    public function it_can_assert_crawler_node_count_is_less_than_number()
+    {
+        $crawler = new Crawler('<div><p>One</p><p>Two</p><p>Three</p></div>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCountLessThan(4);
+        $this->makeResponse([], null, null, $crawler)->assertNodeCountLessThan(4, 'p');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_crawler_node_count_is_less_than_number()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p>One</p><p>Two</p><p>Three</p></div>');
+
+        $this->makeResponse([], null, null, $crawler)->assertNodeCountGreaterThan(3, 'p');
+    }
+
+    /** @test */
+    public function it_can_fail_to_assert_crawler_node_count_is_less_than_number_no_selector()
+    {
+        $this->expectException(AssertionFailedError::class);
+
+        $crawler = new Crawler('<div><p>One</p><p>Two</p><p>Three</p></div>');
+
+        $this->makeResponse([], null, null, $crawler->filter('p'))->assertNodeCountGreaterThan(3);
+    }
+
+    /** @test */
     public function it_can_make_assertions_against_a_filtered_crawler()
     {
         $html = <<<HTML
