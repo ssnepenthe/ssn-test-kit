@@ -11,7 +11,8 @@ class Response
 {
     use Assert\MakesContentAssertions,
         Assert\MakesDomAssertions,
-        Assert\MakesStatusAssertions;
+        Assert\MakesStatusAssertions,
+        Assert\MakesTitleAssertions;
 
     /**
      * @var Client
