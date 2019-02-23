@@ -2,7 +2,7 @@
 
 namespace SsnTestKit;
 
-use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Assert as PHPUnit;
 use Symfony\Component\BrowserKit\Client;
 use PHPUnit\Framework\Constraint\LogicalNot;
 use Symfony\Component\Panther\DomCrawler\Crawler;
@@ -210,14 +210,14 @@ class Response
      */
     public function assertRedirect(string $uri = null)
     {
-        Assert::assertTrue(
+        PHPUnit::assertTrue(
             $this->isRedirect(),
             "Response status code {$this->status()} is not a redirect status code"
         );
 
         if (null !== $uri) {
             // Move to ->assertLocation()? Can we get access to browser base_uri setting to support relative URLs?
-            Assert::assertEquals($uri, $this->header('Location'));
+            PHPUnit::assertEquals($uri, $this->header('Location'));
         }
 
         return $this;
@@ -231,13 +231,13 @@ class Response
         // @todo Handle headers with multiple values. ($this->header($name, false))
         $header = $this->header($name);
 
-        Assert::assertTrue(
+        PHPUnit::assertTrue(
             null !== $header && [] !== $header,
             "Header {$name} is not present on response"
         );
 
         if (null !== $value) {
-            Assert::assertEquals(
+            PHPUnit::assertEquals(
                 $value,
                 $header,
                 "Header {$name} was found but value does not match expected {$value}"
@@ -254,7 +254,7 @@ class Response
     {
         $header = $this->header($name);
 
-        Assert::assertTrue(
+        PHPUnit::assertTrue(
             null === $header || [] === $header,
             "Unexpected header {$name} is present on response"
         );
@@ -269,7 +269,7 @@ class Response
     {
         $cookie = $this->cookie($name);
 
-        Assert::assertNotNull($cookie, "Cookie {$name} not present on response");
+        PHPUnit::assertNotNull($cookie, "Cookie {$name} not present on response");
 
         if (null !== $value) {
             /**
@@ -277,7 +277,7 @@ class Response
              */
             $actual = $cookie->getValue();
 
-            Assert::assertEquals(
+            PHPUnit::assertEquals(
                 $value,
                 $actual,
                 "Cookie {$name} was found but value does not match expected {$value}"
@@ -292,7 +292,7 @@ class Response
      */
     public function assertCookieMissing(string $name)
     {
-        Assert::assertNull($this->cookie($name), "Unexpected cookie {$name} present on response");
+        PHPUnit::assertNull($this->cookie($name), "Unexpected cookie {$name} present on response");
 
         return $this;
     }
