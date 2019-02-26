@@ -32,11 +32,13 @@ class Response
 
     public function content() : string
     {
-        try {
-            return $this->crawler()->html();
-        } catch (\InvalidArgumentException $e) {
+        if ($this->crawler()->count() < 1) {
             return '';
         }
+
+        // @todo When using Goutte there will be an extra newline character before and after - trim?
+        // Also looks like Panther may be inserting an extra newline before </body>?
+        return $this->isPanther() ? $this->crawler()->attr('innerHTML') : $this->crawler()->html();
     }
 
     /**
