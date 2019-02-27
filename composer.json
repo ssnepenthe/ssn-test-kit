@@ -15,6 +15,7 @@
         "vimeo/psalm": "dev-master"
     },
     "autoload": {
+        "files": [ "inc/helpers.php" ],
         "psr-4": { "SsnTestKit\\": "src/" }
     },
     "autoload-dev": {
