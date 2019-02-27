@@ -6,7 +6,7 @@ trait ManagesPosts
 {
     protected function createPost(string $title, string $content, string $status = 'publish') : string
     {
-        return $this->cli()->wpForOutput(sprintf(
+        return $this->wp(sprintf(
             'post create --post_title=%s --post_content=%s --post_status=%s --porcelain',
             escapeshellarg($title),
             escapeshellarg($content),
@@ -18,7 +18,7 @@ trait ManagesPosts
     protected function generatePosts(int $count = 1, array $args = []) : array
     {
         // @todo $args ignored for now, but this is where you would set post_type, post_status, etc.
-        $postIds = $this->cli()->wpForOutput(sprintf(
+        $postIds = $this->wp(sprintf(
             'post generate --count=%s --format=ids',
             escapeshellarg($count)
         ));

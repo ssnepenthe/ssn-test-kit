@@ -6,6 +6,6 @@ trait ManagesPlugins
 {
     protected function activatePlugin(string $slug) : string
     {
-        return $this->cli()->wpForOutput(sprintf('plugin activate %s', escapeshellarg($slug)));
+        return $this->wp(sprintf('plugin activate %s', escapeshellarg($slug)));
     }
 }

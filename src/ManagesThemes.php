@@ -6,6 +6,6 @@ trait ManagesThemes
 {
     protected function activateTheme(string $slug) : string
     {
-        return $this->cli()->wpForOutput(sprintf('theme activate %s', escapeshellarg($slug)));
+        return $this->wp(sprintf('theme activate %s', escapeshellarg($slug)));
     }
 }

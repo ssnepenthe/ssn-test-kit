@@ -8,14 +8,14 @@ trait ManagesOptions
     {
         // @todo Handle the case where option is not set.
         return json_decode(
-            $this->cli()->wpForOutput(sprintf('option get %s --format=json', escapeshellarg($key))),
+            $this->wp(sprintf('option get %s --format=json', escapeshellarg($key))),
             true
         );
     }
 
     protected function setOption(string $key, $value) : string
     {
-        return $this->cli()->wpForOutput(sprintf(
+        return $this->wp(sprintf(
             'option set %s %s --format=json',
             escapeshellarg($key),
             escapeshellarg(json_encode($value))

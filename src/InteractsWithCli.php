@@ -37,4 +37,9 @@ trait InteractsWithCli
 
         return static::$cli;
     }
+
+    public function wp(string $command)
+    {
+        return trim($this->cli()->wp($command, Cli::MUST_RUN)->getOutput());
+    }
 }

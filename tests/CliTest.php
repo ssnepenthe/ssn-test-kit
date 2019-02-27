@@ -39,30 +39,12 @@ class CliTest extends TestCase
     }
 
     /** @test */
-    public function it_can_run_a_command_for_output()
-    {
-        $cli = new Cli();
-        $output = $cli->runForOutput('ls *.md');
-
-        $this->assertStringContainsString('README.md', $output);
-    }
-
-    /** @test */
-    public function it_throws_if_there_is_an_error_when_running_for_output()
+    public function it_can_enforce_that_a_wp_command_must_run()
     {
         $this->expectException(ProcessFailedException::class);
 
         $cli = new Cli();
-        $output = $cli->runForOutput('not-a-real-command');
-    }
-
-    /** @test */
-    public function it_can_run_a_wp_command_for_output()
-    {
-        $cli = new Cli();
-        $output = $cli->wpForOutput('help');
-
-        $this->assertStringContainsString('wp <command>', $output);
+        $process = $cli->wp('not-a-real-command', Cli::MUST_RUN);
     }
 
     /** @test */

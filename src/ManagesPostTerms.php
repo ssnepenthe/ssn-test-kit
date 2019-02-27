@@ -6,7 +6,7 @@ trait ManagesPostTerms
 {
     protected function addTermsToPost(int $postId, string $taxonomy, int ...$termIds) : string
     {
-        return $this->cli()->wpForOutput(sprintf(
+        return $this->wp(sprintf(
             'post term add %s %s %s --by=id',
             escapeshellarg($postId),
             escapeshellarg($taxonomy),
@@ -26,7 +26,7 @@ trait ManagesPostTerms
 
     protected function setPostTerms(int $postId, string $taxonomy, int ...$termIds) : string
     {
-        return $this->cli()->wpForOutput(sprintf(
+        return $this->wp(sprintf(
             'post term set %s %s %s --by=id',
             escapeshellarg($postId),
             escapeshellarg($taxonomy),

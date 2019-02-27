@@ -12,7 +12,7 @@ trait ResetsSite
             throw new \RuntimeException('Unable to locate sql file to reset site');
         }
 
-        $this->cli()->wp('db reset --yes');
-        $this->cli()->wp(sprintf('db import %s', escapeshellarg($this->wpSqlDump())));
+        $this->wp('db reset --yes');
+        $this->wp(sprintf('db import %s', escapeshellarg($this->wpSqlDump())));
     }
 }

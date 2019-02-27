@@ -37,16 +37,6 @@ class Cli
         return $this->run($this->buildWpCommand($command), $mustRun);
     }
 
-    public function runForOutput(string $command) : string
-    {
-        return trim($this->run($command, self::MUST_RUN)->getOutput());
-    }
-
-    public function wpForOutput(string $command) : string
-    {
-        return trim($this->wp($command, self::MUST_RUN)->getOutput());
-    }
-
     public function buildWpCommand(string $command) : string
     {
         if (null !== $this->alias) {
@@ -66,7 +56,7 @@ class Cli
         if (null === $this->wpBinPath) {
             try {
                 // Obviously not portable... May revisit at a later date.
-                $wp = $this->runForOutput('which wp');
+                $wp = trim($this->run('which wp', self::MUST_RUN)->getOutput());
             } catch (ExceptionInterface $e) {
                 // @todo Just let it throw?
                 $wp = 'wp';

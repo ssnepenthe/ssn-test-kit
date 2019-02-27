@@ -12,7 +12,7 @@ trait ManagesTerms
             $command .= sprintf(' --description=%s', escapeshellarg($description));
         }
 
-        return $this->cli()->wpForOutput($command . ' --porcelain');
+        return $this->wp($command . ' --porcelain');
     }
 
     protected function createCategory(string $title, string $description = null) : string
@@ -29,7 +29,7 @@ trait ManagesTerms
     protected function generateTerms(string $taxonomy, int $count = 1, int $maxDepth = 1) : array
     {
         // @todo Consider accepting args array for misc options?
-        $termIds = $this->cli()->wpForOutput(sprintf(
+        $termIds = $this->wp(sprintf(
             'term generate %s --count=%s --max_depth=%s --format=ids',
             escapeshellarg($taxonomy),
             escapeshellarg($count),
