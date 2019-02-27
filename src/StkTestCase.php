@@ -26,6 +26,22 @@ class StkTestCase extends TestCase
              */
             $this->logout();
         }
+
+        $annotations = $this->getAnnotations();
+
+        if (
+            array_key_exists('javascript', $annotations['class'])
+            || array_key_exists('js', $annotations['class'])
+            || array_key_exists('javascript', $annotations['method'])
+            || array_key_exists('js', $annotations['method'])
+        ) {
+            $this->browser()->enableJavascript();
+        }
+    }
+
+    public function tearDown() : void
+    {
+        $this->browser()->disableJavascript();
     }
 
     public static function tearDownAfterClass() : void
