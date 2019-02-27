@@ -55,6 +55,8 @@ class StkTestCase extends TestCase
 
         if (static::$browser instanceof Browser) {
             static::$browser->quit();
+
+            static::$browser = null;
         }
     }
 
