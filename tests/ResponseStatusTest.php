@@ -14,17 +14,21 @@ class ResponseStatusTest extends TestCase
 
     protected function getStatusBlocksForRange($lower, $upper)
     {
-        $codes = $this->getStatusCodes();
+        return array_reduce(
+            $this->getStatusCodes(),
+            function ($carry, $status) use ($lower, $upper) {
+                if ($status >= $lower && $status < $upper) {
+                    // Desired.
+                    $carry[0][] = $status;
+                } else {
+                    // Rest.
+                    $carry[1][] = $status;
+                }
 
-        $desired = array_filter($codes, function ($status) use ($lower, $upper) {
-            return $status >= $lower && $status < $upper;
-        });
-
-        $rest = array_filter($codes, function ($status) use ($lower, $upper) {
-            return $status < $lower || $status >= $upper;
-        });
-
-        return [$desired, $rest];
+                return $carry;
+            },
+            [[], []]
+        );
     }
 
     protected function getStatusCodes()
@@ -153,17 +157,8 @@ class ResponseStatusTest extends TestCase
     /** @test */
     public function it_can_identify_redirect_responses()
     {
-        $redirectCodes = [201, 301, 302, 303, 307, 308];
-
-        $allCodes = $this->getStatusCodes();
-
-        $desired = array_filter($allCodes, function ($status) use ($redirectCodes) {
-            return \in_array($status, $redirectCodes, true);
-        });
-
-        $rest = array_filter($allCodes, function ($status) use ($redirectCodes) {
-            return ! \in_array($status, $redirectCodes, true);
-        });
+        $desired = [201, 301, 302, 303, 307, 308];
+        $rest = array_diff($this->getStatusCodes(), $desired);
 
         foreach ($desired as $status) {
             $withoutLocation = $this->makeResponse($status);
