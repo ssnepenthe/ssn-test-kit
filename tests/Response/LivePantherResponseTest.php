@@ -248,6 +248,35 @@ class LivePantherResponseTest extends HttpTestCase
     }
 
     /** @test */
+    public function test_follow_redirect()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Redirects are always followed when using WebDriver.');
+
+        $response = $this->browser()->get('/status-redirection');
+
+        // Redirects are automatically followed.
+        $this->assertEquals('http://localhost/', $response->url());
+
+        $response->followRedirect();
+    }
+
+    /** @test */
+    public function test_follow_redirects()
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Redirects are always followed when using WebDriver.');
+
+        // /redirect-chain -> /status-redirection -> /
+        $response = $this->browser()->get('/redirect-chain');
+
+        // Redirects are automatically followed.
+        $this->assertEquals('http://localhost/', $response->url());
+
+        $response->followRedirects();
+    }
+
+    /** @test */
     public function test_get_title_text()
     {
         $response = $this->browser()->get('/');

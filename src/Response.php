@@ -115,6 +115,10 @@ class Response
 
     public function url() : string
     {
+        if (method_exists($this->client(), 'getCurrentURL')) {
+            return $this->client()->getCurrentURL();
+        }
+
         return $this->client()->getInternalRequest()->getUri();
     }
 
@@ -231,6 +235,30 @@ class Response
         return \in_array($this->status(), [ 201, 301, 302, 303, 307, 308 ], true) && (
             null === $location ?: $location === $this->header('Location')
         );
+    }
+
+    /**
+     * @return self
+     */
+    public function followRedirect()
+    {
+        // Will throw if not a redirect...
+        $this->client()->followRedirect();
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function followRedirects()
+    {
+        // Will throw if not a redirect or maxRedirects setting has been reached...
+        do {
+            $this->client()->followRedirect();
+        } while ($this->isRedirection());
+
+        return $this;
     }
 
     /**

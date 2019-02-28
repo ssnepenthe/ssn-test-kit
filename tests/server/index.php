@@ -143,6 +143,10 @@ switch ($_SERVER['REQUEST_URI']) {
         renderStatus(404);
         break;
 
+    case '/redirect-chain':
+        header('Location: http://localhost/status-redirection');
+        break;
+
     case '/js-delayed-visibility':
         echo render('js-delayed-visibility.php');
         break;

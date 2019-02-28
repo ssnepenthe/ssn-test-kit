@@ -242,6 +242,31 @@ class LiveGoutteResponseTest extends HttpTestCase
     }
 
     /** @test */
+    public function test_follow_redirect()
+    {
+        $response = $this->browser()->get('/status-redirection');
+
+        $this->assertEquals('http://localhost/status-redirection', $response->url());
+
+        $response->followRedirect();
+
+        $this->assertEquals('http://localhost', $response->url());
+    }
+
+    /** @test */
+    public function test_follow_redirects()
+    {
+        // /redirect-chain -> /status-redirection -> /
+        $response = $this->browser()->get('/redirect-chain');
+
+        $this->assertEquals('http://localhost/redirect-chain', $response->url());
+
+        $response->followRedirects();
+
+        $this->assertEquals('http://localhost', $response->url());
+    }
+
+    /** @test */
     public function test_get_title_text()
     {
         $response = $this->browser()->get('/');
