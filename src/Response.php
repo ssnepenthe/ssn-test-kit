@@ -108,6 +108,11 @@ class Response
         return $this->client->getInternalResponse();
     }
 
+    public function url() : string
+    {
+        return $this->client()->getInternalRequest()->getUri();
+    }
+
     /**
      * @return self
      */

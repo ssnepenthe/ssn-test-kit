@@ -8,79 +8,70 @@ trait MakesUrlAssertions
 {
     public function assertUrlIs(string $url)
     {
-        PHPUnit::assertEquals($url, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertEquals($url, $this->url());
 
         return $this;
     }
 
     public function assertUrlIsNot(string $url)
     {
-        PHPUnit::assertNotEquals($url, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertNotEquals($url, $this->url());
 
         return $this;
     }
 
     public function assertUrlContains(string $needle)
     {
-        PHPUnit::assertStringContainsString(
-            $needle,
-            $this->client()->getInternalRequest()->getUri()
-        );
+        PHPUnit::assertStringContainsString($needle, $this->url());
 
         return $this;
     }
 
     public function assertUrlDoesNotContain(string $needle)
     {
-        PHPUnit::assertStringNotContainsString(
-            $needle,
-            $this->client()->getInternalRequest()->getUri()
-        );
+        PHPUnit::assertStringNotContainsString($needle, $this->url());
 
         return $this;
     }
 
     public function assertUrlStartsWith(string $prefix)
     {
-        PHPUnit::assertStringStartsWith($prefix, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertStringStartsWith($prefix, $this->url());
 
         return $this;
     }
 
     public function assertUrlDoesNotStartWith(string $prefix)
     {
-        PHPUnit::assertStringStartsNotWith(
-            $prefix,
-            $this->client()->getInternalRequest()->getUri()
-        );
+        PHPUnit::assertStringStartsNotWith($prefix, $this->url());
 
         return $this;
     }
 
     public function assertUrlEndsWith(string $suffix)
     {
-        PHPUnit::assertStringEndsWith($suffix, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertStringEndsWith($suffix, $this->url());
 
         return $this;
     }
 
     public function assertUrlDoesNotEndWith(string $suffix)
     {
-        PHPUnit::assertStringEndsNotWith($suffix, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertStringEndsNotWith($suffix, $this->url());
 
         return $this;
     }
 
     public function assertUrlMatches(string $pattern)
     {
-        PHPUnit::assertRegExp($pattern, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertRegExp($pattern, $this->url());
 
         return $this;
     }
 
     public function assertUrlDoesNotMatch(string $pattern)
     {
-        PHPUnit::assertNotRegExp($pattern, $this->client()->getInternalRequest()->getUri());
+        PHPUnit::assertNotRegExp($pattern, $this->url());
 
         return $this;
     }
