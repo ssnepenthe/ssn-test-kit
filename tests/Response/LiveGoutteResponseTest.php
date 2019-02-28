@@ -1,10 +1,11 @@
 <?php
 
-namespace SsnTestKit\Tests;
+namespace SsnTestKit\Tests\Response;
 
 use Goutte\Client;
 use SsnTestKit\Browser;
 use SsnTestKit\MakesHttpRequests;
+use SsnTestKit\Tests\HttpTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\BrowserKit\Response;
 

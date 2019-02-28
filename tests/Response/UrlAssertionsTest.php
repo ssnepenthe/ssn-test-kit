@@ -1,5 +1,7 @@
 <?php
 
+namespace SsnTestKit\Tests\Response;
+
 use PHPUnit\Framework\TestCase;
 use SsnTestKit\Tests\MakesResponses;
 use Symfony\Component\BrowserKit\Request;

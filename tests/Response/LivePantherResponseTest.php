@@ -1,10 +1,11 @@
 <?php
 
-namespace SsnTestKit\Tests;
+namespace SsnTestKit\Tests\Response;
 
 use SsnTestKit\Browser;
 use PHPUnit\Framework\TestCase;
 use SsnTestKit\MakesHttpRequests;
+use SsnTestKit\Tests\HttpTestCase;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\BrowserKit\Response;
