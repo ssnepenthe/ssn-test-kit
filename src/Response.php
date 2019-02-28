@@ -36,9 +36,13 @@ class Response
             return '';
         }
 
+        // @todo Looks like Panther may be inserting an extra newline before </body>?
+        if ($this->isPanther()) {
+            return $this->crawler()->attr('innerHTML') ?: '';
+        }
+
         // @todo When using Goutte there will be an extra newline character before and after - trim?
-        // Also looks like Panther may be inserting an extra newline before </body>?
-        return $this->isPanther() ? $this->crawler()->attr('innerHTML') : $this->crawler()->html();
+        return $this->crawler()->html();
     }
 
     /**
@@ -46,13 +50,14 @@ class Response
      */
     public function title() : string
     {
-        $crawler = $this->crawler()->filter('title');
-
-        if ($crawler->count() < 1) {
-            return '';
+        // Rough equivalent of checking $this->isPanther().
+        if (method_exists($this->client(), 'getTitle')) {
+            return $this->client()->getTitle();
         }
 
-        return $this->isPanther() ? $crawler->attr('textContent') : $crawler->text();
+        $crawler = $this->crawler()->filter('title');
+
+        return $crawler->count() > 0 ? $crawler->text() : '';
     }
 
     /**
