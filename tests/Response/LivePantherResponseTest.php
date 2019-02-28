@@ -245,4 +245,12 @@ class LivePantherResponseTest extends HttpTestCase
     {
         // @todo
     }
+
+    /** @test */
+    public function test_get_title_text()
+    {
+        $response = $this->browser()->get('/');
+
+        $this->assertEquals('Test Server Home', $response->title());
+    }
 }

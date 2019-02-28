@@ -52,6 +52,16 @@ HTML;
     }
 
     /** @test */
+    public function it_provides_access_to_title_text()
+    {
+        $this->assertEquals('', $this->makeResponse()->title());
+        $this->assertEquals(
+            'Test',
+            $this->makeResponse('<html><head><title>Test</title></head><body></body></html>')->title()
+        );
+    }
+
+    /** @test */
     public function it_provides_access_to_single_cookie()
     {
         $cookieJar = new CookieJar();

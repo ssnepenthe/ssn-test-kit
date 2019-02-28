@@ -42,6 +42,20 @@ class Response
     }
 
     /**
+     * @see https://github.com/symfony/panther/issues/6
+     */
+    public function title() : string
+    {
+        $crawler = $this->crawler()->filter('title');
+
+        if ($crawler->count() < 1) {
+            return '';
+        }
+
+        return $this->isPanther() ? $crawler->attr('textContent') : $crawler->text();
+    }
+
+    /**
      * @return \Symfony\Component\BrowserKit\Cookie|null
      */
     public function cookie(string $name, string $path = '/', string $domain = null)
