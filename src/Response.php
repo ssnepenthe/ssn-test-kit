@@ -263,6 +263,26 @@ class Response
 
     /**
      * @return self
+     *
+     * @todo Maybe trait?
+     */
+    public function resize(int $width, int $height)
+    {
+        if (! method_exists($this->client(), 'manage')) {
+            throw new \RuntimeException(
+                'It is not possible to resize the browser window when using Goutte'
+            );
+        }
+
+        $this->client()->manage()->window()->setSize(
+            new \Facebook\WebDriver\WebDriverDimension($width, $height)
+        );
+
+        return $this;
+    }
+
+    /**
+     * @return self
      */
     public function assertRedirect(string $uri = null)
     {

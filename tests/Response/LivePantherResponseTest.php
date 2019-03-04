@@ -3,7 +3,6 @@
 namespace SsnTestKit\Tests\Response;
 
 use SsnTestKit\Browser;
-use PHPUnit\Framework\TestCase;
 use SsnTestKit\MakesHttpRequests;
 use SsnTestKit\Tests\HttpTestCase;
 use Symfony\Component\Panther\Client;
@@ -282,5 +281,18 @@ class LivePantherResponseTest extends HttpTestCase
         $response = $this->browser()->get('/');
 
         $this->assertEquals('Test Server Home', $response->title());
+    }
+
+    /** @test */
+    public function test_resize() {
+        $response = $this->browser()->get('/');
+
+        $this->assertTrue(
+            $response->crawler()->filter('.hidden-small')->getElement(0)->isDisplayed()
+        );
+
+        $this->assertFalse(
+            $response->resize(375, 667)->crawler()->filter('.hidden-small')->getElement(0)->isDisplayed()
+        );
     }
 }

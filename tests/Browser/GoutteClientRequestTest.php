@@ -60,4 +60,12 @@ class GoutteClientRequestTest extends TestCase
         $this->assertFalse($response->isPanther());
         $this->assertEquals('This is without JavaScript.', $response->crawler()->filter('p')->text());
     }
+
+    /** @test */
+    public function it_throws_when_attempting_to_resize_browser_window() {
+        $this->expectException(\RuntimeException::class);
+
+        $browser = new Browser();
+        $browser->resize(375, 667);
+    }
 }

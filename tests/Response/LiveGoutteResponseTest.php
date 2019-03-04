@@ -273,4 +273,11 @@ class LiveGoutteResponseTest extends HttpTestCase
 
         $this->assertEquals('Test Server Home', $response->title());
     }
+
+    /** @test */
+    public function test_resize() {
+        $this->expectException(\RuntimeException::class);
+
+        $this->browser()->resize(375, 667);
+    }
 }

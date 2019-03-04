@@ -107,4 +107,23 @@ class PantherClientRequestTest extends TestCase
             $this->assertEqualsWithDelta(3, $end - $start, 0.1);
         });
     }
+
+    /** @test */
+    public function it_can_resize_the_browser_window() {
+        $browser = new Browser();
+
+        $browser->withJavascript(function ($browser) {
+            $response = $browser->request('GET', 'http://localhost/');
+
+            $this->assertTrue(
+                $response->crawler()->filter('.hidden-small')->getElement(0)->isDisplayed()
+            );
+
+            $response = $browser->resize(375, 667)->request('GET', 'http://localhost/');
+
+            $this->assertFalse(
+                $response->crawler()->filter('.hidden-small')->getElement(0)->isDisplayed()
+            );
+        });
+    }
 }

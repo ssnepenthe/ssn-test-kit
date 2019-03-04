@@ -147,6 +147,26 @@ class Browser
     }
 
     /**
+     * @return self
+     *
+     * @todo Maybe trait?
+     * @todo Look into what the default window size is...
+     */
+    public function resize(int $width, int $height) {
+        if (! $this->isJavascriptEnabled()) {
+            throw new \RuntimeException(
+                'It is not possible to resize the browser window when using Goutte'
+            );
+        }
+
+        $this->client()->manage()->window()->setSize(
+            new \Facebook\WebDriver\WebDriverDimension($width, $height)
+        );
+
+        return $this;
+    }
+
+    /**
      * @todo Consider simplifying method signatures a bit?
      */
     public function request(

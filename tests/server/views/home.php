@@ -6,11 +6,18 @@
 
 	<style>
 		.hidden { display: none; }
+
+		.hidden-small { display: none; }
+
+		@media screen and (min-width: 768px) {
+			.hidden-small { display: block; }
+		}
 	</style>
 </head>
 <body>
 	<h1>Home</h1>
 	<p>This is a paragraph</p>
+	<p class="hidden-small">This is hidden on small screens</p>
 	<p class="js-delayed-visibility hidden">This is hidden by default</p>
 
 	<script>
